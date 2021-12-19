@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+</head>
+<body>
+  <form action="/signup" method="post">
+    <label for="nickname_input">Никнейм (поменять нельзя)</label>
+    <br/>
+    <input id="nickname_input" name="nick" type="text" required="required" />
+    <br/><br/>
+
+    <label for="first_name_input">Имя</label>
+    <br/>
+    <input id="first_name_input" name="first_name" type="text" required="required" />
+    <br/><br/>
+
+    <label for="last_name_input">Фамилия</label>
+    <br/>
+    <input id="last_name_input" name="last_name" type="text" required="required" />
+    <br/><br/>
+
+    <label for="mail_input">Почта</label>
+    <br/>
+    <input id="mail_input" name="mail" type="text" required="required" />
+    <br/><br/>
+
+    <label for="password">Пароль</label>
+    <br/>
+    <input id="password" name="password" type="password" required="required" />
+    <br/><br/>
+
+    <label for="repeat_password_input">Повторите пароль</label>
+    <br/>
+    <input id="repeat_password_input" name="repeat_password" type="password" required="required" />
+    <br/><br/>
+
+    <input type="submit" value="Зарегистрироваться">
+  </form>
+</body>
+</html>

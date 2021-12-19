@@ -12,7 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.2"
+    "express": "^4.17.2",
+    "mysql2": "^2.3.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.5",
