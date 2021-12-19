@@ -1,0 +1,67 @@
+const CompressionPlugin = require('compression-webpack-plugin');
+const BrotliPlugin = require('brotli-webpack-plugin');
+const path = require('path');
+
+module.exports = {
+  mode: 'production',
+  entry: {
+  },
+  output: {
+    path: path.join(__dirname, "/dist"),
+    filename: "[name].js",
+    publicPath: 'dist/'
+  },
+  module: {
+    rules: [
+      {
+        test: /.js$/,
+        exclude: /(node_modules)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            cacheDirectory: true,
+            presets: ['@babel/preset-env', '@babel/preset-react']
+          }
+        }
+      },
+      {
+        test: /\.s[ac]ss$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              url: false
+            }
+          },
+          'sass-loader',
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              url: false
+            }
+          }
+        ]
+      },
+    ]
+  },
+  plugins: [
+    new CompressionPlugin({
+      algorithm: 'gzip',
+      test: /\.js$|\.css$/,
+      threshold: 10240,
+      minRatio: 0.8,
+    }),
+    new BrotliPlugin({
+      test: /\.js$|\.css$/,
+      threshold: 10240,
+      minRatio: 0.8,
+    })
+  ]
+}
