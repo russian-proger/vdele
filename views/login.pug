@@ -17,6 +17,10 @@ html(lang="en")
       input#password(name='password', type='password', required='required')
       br
       br
+      input#remember(name='remember', type='checkbox')
+      label(for='remember') Запомнить меня на месяц
+      br
+      br
       input(type="submit", value="Войти")
       if incorrect_login
         label Неверный логин

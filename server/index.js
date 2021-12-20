@@ -1,17 +1,19 @@
 // --------------= Import =----------------//
 
 // Standart libraries
-const fs        = require('fs');
-const http      = require('http');
+const crypto         = require('crypto');
+const fs             = require('fs');
+const http           = require('http');
 
 // External libraries
-const express   = require('express');
-const mysql = require('mysql2');
+const cookieParser   = require('cookie-parser');
+const express        = require('express');
+const mysql          = require('mysql2');
 
 // My .js files
-const iniParser   = require('./ini-parser');
-const expressions = require('./expressions');
-const image_tool  = require('./image');
+const iniParser      = require('./ini-parser');
+const expressions    = require('./expressions');
+const image_tool     = require('./image');
 require('./types');
 
 
@@ -43,9 +45,21 @@ const mysqlOptions = ({
 }
 
 const pool = mysql.createPool(mysqlOptions);
+const poolPromise = pool.promise();
 
 
 // --------------= Functions =----------------//
+
+/**
+ * format from js date object into mysql datetime
+ * @param {Date} date 
+ * @returns {string}
+ */
+ function convertDate2DateTime(date) {
+  function pad(s) { return (s < 10) ? '0' + s : s; }
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
 function sendView(response, view_name) {
   response.send(fs.readFileSync(`${__dirname}/../views/${view_name}`).toString());
 }
@@ -115,6 +129,21 @@ function addNewUser(data) {
   });
 }
 
+async function addNewSignToken(user_id, token, end_date) {
+  const [rows, fields] = await poolPromise.execute(
+    'INSERT INTO sign_token (token, user_id, end_dt) VALUES (?, ?, ?)'
+    , [token, user_id, convertDate2DateTime(end_date)]
+  );
+}
+
+async function getUserBySignToken(user_id, token) {
+  const [rows, fields] = await poolPromise.execute(
+    'SELECT * FROM sign_token INNER JOIN user ON user.id=sign_token.user_id WHERE token=? AND user_id=?',
+    [token, user_id]
+  );
+  return rows[0];
+}
+
 function isValidMail(mail) {
   if (mail.length > 64) return false;
   return expressions.mail_expr.test(mail);
@@ -158,12 +187,44 @@ async function isValidSignUpForm(form) {
   return true;
 }
 
+async function getUserByCookie(cookies) {
+  if (!cookies || !cookies.user_id || !cookies.sign_token) {
+    return undefined;
+  }
+
+  if (
+    !expressions.int_expr.test(cookies.user_id) ||
+    !expressions.token_expr.test(cookies.sign_token)
+  ) { return undefined; }
+
+  return await getUserBySignToken(cookies.user_id, cookies.sign_token);
+}
+
+
 
 // --------------= Routes =----------------//
 
+// Middlewares
+app.use(cookieParser(ENV.SERVER.SECRET_KEY));
 
+// Settings
 app.set("view engine", "pug");
 app.set("views", `${__dirname}/../views`);
+
+// User auth middleware
+app.use('/', async (req, res, next) => {
+  const uinfo = await getUserByCookie(req.cookies);
+  req.is_auth = !!uinfo;
+  
+  if (req.is_auth) {
+    req.uinfo = uinfo;
+  }
+
+  console.log(req.uinfo);
+
+  return next();
+});
+
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -197,7 +258,20 @@ app.post('/login', async (req, res) => {
       return res.render('login', { incorrect_password: true });
     }
 
-    return res.render('login', { success: true });
+    const key = crypto.generateKeySync('hmac', { length: 256 }).export().toString("hex");
+    const token = `${uinfo.id}_${key}`;
+    let cookieOptions = new Object();
+
+    if (data.remember) {
+      cookieOptions.expires = new Date(Date.now() + 28*24*60*60*1000);
+      addNewSignToken(uinfo.id, token, cookieOptions.expires);
+    } else {
+      addNewSignToken(uinfo.id, token, new Date(Date.now() + 24*60*60*1000));
+    }
+
+    res.cookie('sign_token', token, cookieOptions);
+    res.cookie('user_id', uinfo.id, cookieOptions);
+    return res.redirect("/");
   }
 
   return res.render('login', {});
