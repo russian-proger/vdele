@@ -6,12 +6,21 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Вход | ВДеле
   body
-    form(action='/auth', method='post')
+    form(action='/login', method='post')
       label(for='login') Почта или никнейм
       br
-      input#login(name='nick', type='text', required='required')
+      input#login(name='login', type='text', required='required')
       br
       br
       label(for='password') Пароль
       br
       input#password(name='password', type='password', required='required')
+      br
+      br
+      input(type="submit", value="Войти")
+      if incorrect_login
+        label Неверный логин
+      else if incorrect_password
+        label Неверный пароль
+      else if success
+        label Вход успешный!

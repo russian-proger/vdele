@@ -57,7 +57,7 @@ function sendView(response, view_name) {
  */
 function getUserByMail(mail) {
   return new Promise(resolve => {
-    pool.execute('SELECT mail FROM `user` WHERE mail=?', [mail], function(err, result) {
+    pool.execute('SELECT * FROM `user` WHERE mail=?', [mail], function(err, result) {
       if (err) {
         console.error(err.message);
         resolve(1);
@@ -72,9 +72,9 @@ function getUserByMail(mail) {
  * @param {string} nick
  * @returns {object|undefined}
  */
-function getUserNick(nick) {
+function getUserByNick(nick) {
   return new Promise(resolve => {
-    pool.execute('SELECT nick FROM `user` WHERE nick=?', [nick], function(err, result) {
+    pool.execute('SELECT * FROM `user` WHERE nick=?', [nick], function(err, result) {
       if (err) {
         console.error(err.message);
         resolve(1);
@@ -152,7 +152,7 @@ async function isValidSignUpForm(form) {
 
   if (
     await getUserByMail(form.mail) !== undefined ||
-    await getUserNick(form.nick) !== undefined
+    await getUserByNick(form.nick) !== undefined
   ) { return false; }
 
   return true;
@@ -160,6 +160,10 @@ async function isValidSignUpForm(form) {
 
 
 // --------------= Routes =----------------//
+
+
+app.set("view engine", "pug");
+app.set("views", `${__dirname}/../views`);
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -169,26 +173,34 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  sendView(res, 'login.html');
+  res.render('login', {});
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   /** @type {SignInFormData} */
   const data = req.body;
   if (data && data.login && data.password) {
     let uinfo;
     if (expressions.mail_expr.test(data.login)) {
       // login is a mail
-      uinfo = getUserByMail(data.login);
+      uinfo = await getUserByMail(data.login);
     } else if (expressions.nick_expr.test(data.login)) {
       // login is a nickname
-      uinfo = getUserByMail(data.login);
+      uinfo = await getUserByNick(data.login);
     } else {
-      return sendView(res, 'login.html');
+      return res.render('login', { incorrect_login: true });
     }
+
+    if (uinfo === undefined) {
+      return res.render('login', { incorrect_login: true });
+    } else if (uinfo.password != data.password) {
+      return res.render('login', { incorrect_password: true });
+    }
+
+    return res.render('login', { success: true });
   }
 
-  sendView(res, 'login.html');
+  return res.render('login', {});
 });
 
 app.get('/signup', (req, res) => {
