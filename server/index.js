@@ -187,6 +187,11 @@ async function isValidSignUpForm(form) {
   return true;
 }
 
+/**
+ * Find the user by cookie data
+ * @param {Object} cookies 
+ * @returns {UserTable|null}
+ */
 async function getUserByCookie(cookies) {
   if (!cookies || !cookies.user_id || !cookies.sign_token) {
     return undefined;
@@ -202,14 +207,12 @@ async function getUserByCookie(cookies) {
 
 
 
-// --------------= Routes =----------------//
 
-// Middlewares
+
+
+// --------------= Middlewares =----------------//
+
 app.use(cookieParser(ENV.SERVER.SECRET_KEY));
-
-// Settings
-app.set("view engine", "pug");
-app.set("views", `${__dirname}/../views`);
 
 // User auth middleware
 app.use('/', async (req, res, next) => {
@@ -217,27 +220,40 @@ app.use('/', async (req, res, next) => {
   req.is_auth = !!uinfo;
   
   if (req.is_auth) {
-    req.uinfo = uinfo;
+    req.user_info = uinfo;
+  } else {
+    res.clearCookie('sign_token');
+    res.clearCookie('user_id');
   }
-
-  console.log(req.uinfo);
 
   return next();
 });
+
+// Settings
+app.set("view engine", "pug");
+app.set("views", `${__dirname}/../views`);
+
+
+// --------------= Routes =----------------//
 
 
 app.use(express.urlencoded({ extended: true }));
 
 // Main route
 app.get('/', (req, res) => {
+  if (req.is_auth)  {
+    return res.render('netapp', {user: JSON.stringify({...req.user_info, token: undefined }) });
+  }
   sendView(res, 'welcome.html');
 });
 
 app.get('/login', (req, res) => {
+  if (req.is_auth) return res.redirect('/');
   res.render('login', {});
 });
 
 app.post('/login', async (req, res) => {
+  if (req.is_auth) return res.redirect('/');
   /** @type {SignInFormData} */
   const data = req.body;
   if (data && data.login && data.password) {
@@ -278,16 +294,18 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
+  if (req.is_auth) return res.redirect('/');
   sendView(res, 'signup.html');
 });
 
 app.post('/signup', async (req, res) => {
+  if (req.is_auth) return res.redirect('/');
   if (req.body && await isValidSignUpForm(req.body)) {
     await addNewUser(req.body);
 
-    sendView(res, 'welcome.html');
+    return res.redirect('/login');
   } else {
-    sendView(res, 'signup.html');
+    res.render('signup', {});
   }
   res.end();
   return;
@@ -300,6 +318,7 @@ app.get('/auth_vk', (req, res) => {
 // Folders
 app.use('/scripts', express.static(`${__dirname}/../source/scripts`));
 app.use('/dist', express.static(`${__dirname}/../dist`));
+app.use('/profile_photos', express.static(`${__dirname}/../resources/profile_photos`));
 
 
 

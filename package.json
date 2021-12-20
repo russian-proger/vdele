@@ -7,16 +7,20 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch --env dev --progress"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
     "cookie-parser": "^1.4.6",
     "express": "^4.17.2",
     "jimp": "^0.16.1",
     "mysql2": "^2.3.3",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "react-dom": "^17.0.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.5",
@@ -25,6 +29,7 @@
     "brotli-webpack-plugin": "^1.1.0",
     "compression-webpack-plugin": "^9.2.0",
     "css-loader": "^6.5.1",
+    "sass": "^1.45.0",
     "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.65.0"

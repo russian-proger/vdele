@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   mode: 'development',
   entry: {
-    game: "./src/client/index.js"
+    network_app: "./source/network_app/index.js"
   },
   output: {
     path: path.join(__dirname, "/dist"),
