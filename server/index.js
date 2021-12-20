@@ -11,7 +11,9 @@ const mysql = require('mysql2');
 // My .js files
 const iniParser   = require('./ini-parser');
 const expressions = require('./expressions');
+const image_tool  = require('./image');
 require('./types');
+
 
 // Variables
 const ENV = iniParser.parseINIFile(__dirname + '/env.ini');
@@ -92,16 +94,22 @@ function getUserByVKID(vkid) {
   return undefined;
 }
 
+/**
+ * 
+ * @param {SignUpFormData} data 
+ * @returns {bool}
+ */
 function addNewUser(data) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     pool.execute(
     'INSERT INTO user (nick, first_name, last_name, mail, password, photo_name, created_dt) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)',
-    [data.nick, data.first_name, data.last_name, data.mail, data.password, '_'],
-    function(err, result) {
+    [data.nick, data.first_name, data.last_name, data.mail, data.password, `${data.nick}.png`],
+    async function(err, result) {
       if (err) {
         console.error(err.message);
         resolve(false);
       }
+      await image_tool.generateRandomImage(`${__dirname}/../resources/profile_photos/${data.nick}.png`);
       resolve(true);
     });
   });
@@ -161,6 +169,25 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  sendView(res, 'login.html');
+});
+
+app.post('/login', (req, res) => {
+  /** @type {SignInFormData} */
+  const data = req.body;
+  if (data && data.login && data.password) {
+    let uinfo;
+    if (expressions.mail_expr.test(data.login)) {
+      // login is a mail
+      uinfo = getUserByMail(data.login);
+    } else if (expressions.nick_expr.test(data.login)) {
+      // login is a nickname
+      uinfo = getUserByMail(data.login);
+    } else {
+      return sendView(res, 'login.html');
+    }
+  }
+
   sendView(res, 'login.html');
 });
 

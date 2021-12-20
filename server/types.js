@@ -7,3 +7,9 @@
  * @property {string} password
  * @property {string} repeat_password
  */
+
+/**
+ * @typedef SignInFormData
+ * @property {string} login
+ * @property {string} password
+ */

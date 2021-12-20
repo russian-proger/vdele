@@ -13,7 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.2",
-    "mysql2": "^2.3.3"
+    "jimp": "^0.16.1",
+    "mysql2": "^2.3.3",
+    "pug": "^3.0.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.5",
