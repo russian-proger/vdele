@@ -115,10 +115,12 @@ export default function Header() {
 
   function onClickAvatar(event) {
     setState({...state, menuAvatar: event.currentTarget});
+    return true;
   }
 
   function onCloseAvatar() {
     setState({...state, menuAvatar: null});
+    return true;
   }
 
   return (
@@ -156,11 +158,11 @@ export default function Header() {
           >
             <Typography align='center'>{window.user_info.first_name} {window.user_info.last_name}</Typography>
             <div className={classes.separator} />
-            <MenuItem onClick={() => navigate(`/profile/${window.user_info.id}`)}>Профиль</MenuItem>
-            <MenuItem>Мои проекты</MenuItem>
-            <MenuItem>Мои организации</MenuItem>
+            <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}`)}>Профиль</MenuItem>
+            <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}/projects`)}>Мои проекты</MenuItem>
+            <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}/organizations`)}>Мои организации</MenuItem>
             <div className={classes.separator} />
-            <MenuItem onClick={() => window.open('/quit', '_self')}>Выйти</MenuItem>
+            <MenuItem onClick={() => onCloseAvatar() && window.open('/quit', '_self')}>Выйти</MenuItem>
           </Menu>
         </div>
       </Toolbar>

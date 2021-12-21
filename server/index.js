@@ -14,6 +14,7 @@ const mysql          = require('mysql2');
 const iniParser      = require('./ini-parser');
 const expressions    = require('./expressions');
 const image_tool     = require('./image');
+require('./api_types');
 require('./types');
 
 
@@ -96,6 +97,13 @@ function getUserByNick(nick) {
       resolve(result[0]);
     });
   })
+}
+
+async function getUserByID(user_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT id, nick, mail, first_name, last_name, photo_name, created_dt FROM user WHERE id=?`, [user_id]
+  );
+  return rows[0];
 }
 
 /**
@@ -247,6 +255,7 @@ app.set("view engine", "pug");
 app.set("views", `${__dirname}/../views`);
 
 
+
 // --------------= Routes =----------------//
 
 
@@ -328,7 +337,7 @@ app.get('/auth_vk', (req, res) => {
   sendView(res, 'auth_vk.html');
 });
 
-app.all('/profile/:user_id', (req, res) => {
+app.use('/profile/:user_id', (req, res) => {
   return checkNetworkApp(req, res);
 });
 
@@ -337,11 +346,44 @@ app.all('/quit', async (req, res) => {
   return res.redirect('/');
 });
 
+
 // Folders
 app.use('/scripts', express.static(`${__dirname}/../source/scripts`));
 app.use('/dist', express.static(`${__dirname}/../dist`));
 app.use('/profile_photos', express.static(`${__dirname}/../resources/profile_photos`));
 
+
+
+// --------------= API Route =----------------//
+const apiRoute = express.Router();
+apiRoute.use(express.json());
+// Auth-filter middleware
+apiRoute.use('/', (req, res, next) => {
+  if (!req.is_auth) {
+    res.sendStatus(401);
+    return res.end();
+  }
+  next();
+});
+
+apiRoute.post('/get_user', async (req, res) => {
+  /** @type {GetUserRequest} */
+  const body = req.body;
+  if (!body.user_id || !expressions.int_expr.test(body.user_id)) return res.sendStatus(400);
+
+  const uinfo = await getUserByID(body.user_id);
+  return res.send(JSON.stringify({data: uinfo}));
+});
+
+apiRoute.post('/get_projects', (req, res) => {
+
+});
+
+apiRoute.post('/get_organizations', (req, res) => {
+
+});
+
+app.use('/api', apiRoute);
 
 
 

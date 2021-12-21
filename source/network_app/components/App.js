@@ -29,16 +29,14 @@ export default function App(_props) {
   function onCloseAvatar() {
     setState({...state, menuAvatar: null});
   }
-
+  
   return (
     <BrowserRouter>
-      {/* <Header> */}
       <Header />
-      {/* </Header> */}
-      
       <Routes>
         <Route path="/" element={<Main />}></Route>
         <Route path="/profile/:user_id" element={<UserProfile />}></Route>
+        <Route path="/profile/:user_id/:page" element={<UserProfile />}></Route>
       </Routes>
     </BrowserRouter>
   );
