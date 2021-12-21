@@ -144,6 +144,13 @@ async function deleteSignToken(user_id, token) {
   );
 }
 
+async function createOrganization(user_id, name, logo_name, privacy_id) {
+  const [rows, fields] = await poolPromise.execute(
+    'CALL CreateOrganization(?, ?, ?, ?);'
+    , [user_id, name, 1 - privacy_id, logo_name]
+  );
+}
+
 async function addNewSignToken(user_id, token, end_date) {
   const [rows, fields] = await poolPromise.execute(
     'INSERT INTO sign_token (token, user_id, end_dt) VALUES (?, ?, ?)'
@@ -158,6 +165,15 @@ async function getUserBySignToken(user_id, token) {
   );
   return rows[0];
 }
+
+async function getOrganizations(user_id) {
+  const [rows, fields] = await poolPromise.execute(
+    'SELECT * FROM user_organizations WHERE user_id=?',
+    [user_id]
+  );
+  return rows;
+}
+
 
 function isValidMail(mail) {
   if (mail.length > 64) return false;
@@ -336,9 +352,11 @@ app.get('/auth_vk', (req, res) => {
   sendView(res, 'auth_vk.html');
 });
 
-app.use('/profile/:user_id', (req, res) => {
+const networkAppHandle = (req, res) => {
   return checkNetworkApp(req, res);
-});
+};
+app.use('/profile/:user_id', networkAppHandle);
+app.use('/new_organization', networkAppHandle);
 
 app.all('/quit', async (req, res) => {
   if (req.is_auth) await deleteSignToken(req.user_info.id, req.user_info.token);
@@ -351,6 +369,7 @@ app.use('/scripts', express.static(`${__dirname}/../source/scripts`));
 app.use('/css', express.static(`${__dirname}/../source/css`));
 app.use('/dist', express.static(`${__dirname}/../dist`));
 app.use('/profile_photos', express.static(`${__dirname}/../resources/profile_photos`));
+app.use('/organization_photos', express.static(`${__dirname}/../resources/organization_photos`));
 
 
 
@@ -379,9 +398,23 @@ apiRoute.post('/get_projects', (req, res) => {
 
 });
 
-apiRoute.post('/get_organizations', (req, res) => {
-
+apiRoute.post('/get_organizations', async (req, res) => {
+  const rows = await getOrganizations(req.user_info.id);
+  return res.send(JSON.stringify({result: true, data: rows}));
 });
+
+const privacy_values = ['public', 'private'];
+apiRoute.post('/new_organization', async (req, res) => {
+  const body = req.body;
+  if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
+  if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+
+  const logo_name = `${body.name}_${Date.now()}.png`;
+  await createOrganization(req.user_info.id, body.name, logo_name, privacy_values.indexOf(body.privacy));
+  await image_tool.generateRandomImage(`${__dirname}/../resources/organization_photos/${logo_name}`, 1)
+  return res.send(JSON.stringify({result: true}));
+});
+
 
 app.use('/api', apiRoute);
 

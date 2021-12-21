@@ -19,10 +19,13 @@ import {
 import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
 import ApartmentIcon from '@material-ui/icons/Apartment';
 
-import { makeStyles } from '@material-ui/core/styles';
+import { createTheme, makeStyles, } from '@material-ui/core/styles';
+
 
 import Core from '../core/Core';
 import { int_expr } from '../tools/expressions';
+
+import UserOrganizations from './UserOrganizations';
 
 const useStyles = makeStyles((theme) => ({
   root_container: {
@@ -55,6 +58,14 @@ const pages = ['projects', 'organizations'];
 const IconTab = (Icon, text) => (
   <span style={{display: 'flex'}}><Icon style={{marginRight: 7}} fontSize="small" />{text}</span>
 );
+
+function TabPanel({ index, value, children }) {
+  if (index != value) {
+    return <></>;
+  }
+
+  return children || <></>;
+}
 
 export default function Main() {
   const [_count, forceUpdate] = React.useReducer(x => x + 1, 0);
@@ -101,7 +112,7 @@ export default function Main() {
 
   return (
     <Container className={classes.root_container} maxWidth="lg">
-      <Grid container spacing={2}>
+      <Grid container spacing={4}>
         <Grid item xs={3}>
           <Box>
             <img className={classes.profile_image} src={`/profile_photos/${state.userInfo.photo_name}`} />
@@ -122,10 +133,13 @@ export default function Main() {
               <Tab id="profile-tab-2" label={IconTab(ApartmentIcon, "Организации")} />
             </Tabs>
             <Divider />
-            <br/><br/>
-            <Toolbar>
-              <Button></Button>
-            </Toolbar>
+            <TabPanel index={0} value={pageID}>
+
+            </TabPanel>
+
+            <TabPanel index={1} value={pageID}>
+              <UserOrganizations />
+            </TabPanel>
           </Paper>
         </Grid>
       </Grid>

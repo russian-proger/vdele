@@ -70,7 +70,7 @@ const bitmaps = [
 const width = 8;
 const height = 8;
 const pixel_width = 90;
-function generateRandomImage(path) {
+function generateRandomImage(path, reverse=1) {
   return new Promise((resolve) => {
     const fr_color = 0xffffffff;
     const bg_color = colors[parseInt(Math.random() *  colors.length)];
@@ -86,7 +86,7 @@ function generateRandomImage(path) {
         for (let j = 0; j < height; ++j) {
           for (let x = 0; x < pixel_width; ++x) {
             for (let y = 0; y < pixel_width; ++y) {
-              image.setPixelColor((bitmap[i][j] ? fr_color : bg_color), j * pixel_width + x, i * pixel_width + y);
+              image.setPixelColor((bitmap[i][j] ^ reverse ? fr_color : bg_color), j * pixel_width + x, i * pixel_width + y);
             }
           }
         }

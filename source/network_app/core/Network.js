@@ -32,4 +32,8 @@ export default function Network(self) {
    * @returns {Promise<import('../../../server/api_types').GetUserResponse>}
    */
   this.getUser = (user_id) => this.requestAPI('get_user', { user_id });
+  
+  this.createOrganization = (name, privacy) => this.requestAPI('new_organization', { name, privacy });
+
+  this.getOrganizations = () => this.requestAPI('get_organizations', {});
 }
