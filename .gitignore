@@ -1,5 +1,3 @@
 docs
 node_modules
 *.ini
-resources/profile_photos/*
-resources/organization_photos/*
