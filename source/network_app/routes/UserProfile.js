@@ -11,6 +11,7 @@ import {
   Paper,
   Tab,
   Tabs,
+  Toolbar,
   Typography
 } from '@material-ui/core';
 
@@ -121,6 +122,9 @@ export default function Main() {
             </Tabs>
             <Divider />
             <br/><br/>
+            <Toolbar>
+              <Button></Button>
+            </Toolbar>
           </Paper>
         </Grid>
       </Grid>

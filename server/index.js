@@ -177,8 +177,7 @@ async function isValidSignUpForm(form) {
     !form.mail        ||
     !form.password    ||
     !form.repeat_password
-  ) { return ({ result: false }); }
-
+  ) { return false; }
   if (form.password != form.repeat_password) {
     return false;
   }
@@ -317,7 +316,7 @@ app.post('/login', async (req, res) => {
 
 app.get('/signup', (req, res) => {
   if (req.is_auth) return res.redirect('/');
-  sendView(res, 'signup.html');
+  res.render('signup', {});
 });
 
 app.post('/signup', async (req, res) => {
@@ -327,7 +326,7 @@ app.post('/signup', async (req, res) => {
 
     return res.redirect('/login');
   } else {
-    res.render('signup', {});
+    res.render('signup', {...req.body});
   }
   res.end();
   return;
@@ -349,6 +348,7 @@ app.all('/quit', async (req, res) => {
 
 // Folders
 app.use('/scripts', express.static(`${__dirname}/../source/scripts`));
+app.use('/css', express.static(`${__dirname}/../source/css`));
 app.use('/dist', express.static(`${__dirname}/../dist`));
 app.use('/profile_photos', express.static(`${__dirname}/../resources/profile_photos`));
 

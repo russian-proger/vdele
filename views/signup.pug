@@ -1,40 +1,41 @@
 doctype html
 html(lang='en')
   head
+    title Регистрация
     meta(charset='UTF-8')
-    meta(http-equiv='X-UA-Compatible' content='IE=edge')
-    meta(name='viewport' content='width=device-width, initial-scale=1.0')
-    title Регистрация | ВДеле
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    link(rel='stylesheet' type='text/css' href='css/signup_util.css')
+    link(rel='stylesheet' type='text/css' href='css/signup_main.css')
+    link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap')
+    style.
+      * {
+      font-family: Roboto !important;
+      }
   body
-    form(action='/signup' method='post')
-      label(for='nickname_input') Никнейм (поменять нельзя)
-      br
-      input#nickname_input(name='nick' type='text' required='required')
-      br
-      br
-      label(for='first_name_input') Имя
-      br
-      input#first_name_input(name='first_name' type='text' required='required')
-      br
-      br
-      label(for='last_name_input') Фамилия
-      br
-      input#last_name_input(name='last_name' type='text' required='required')
-      br
-      br
-      label(for='mail_input') Почта
-      br
-      input#mail_input(name='mail' type='text' required='required')
-      br
-      br
-      label(for='password') Пароль
-      br
-      input#password(name='password' type='password' required='required')
-      br
-      br
-      label(for='repeat_password_input') Повторите пароль
-      br
-      input#repeat_password_input(name='repeat_password' type='password' required='required')
-      br
-      br
-      input(type='submit' value='Зарегистрироваться')
+    .limiter
+      .container-login100
+        .wrap-login100
+          form.login100-form.validate-form.p-l-55.p-r-55.p-t-178(method="post", action="/signup")
+            span.login100-form-title
+              | Регистрация
+            .wrap-input100.validate-input.m-b-16(data-validate='Please enter username')
+              input.input100(type='text' name='nick' placeholder='Никнейм', value=nick)
+              span.focus-input100
+            .wrap-input100.validate-input.m-b-16(data-validate='Please enter username')
+              input.input100(type='text' name='first_name' placeholder='Имя', value=first_name)
+              span.focus-input100
+            .wrap-input100.validate-input.m-b-16(data-validate='Please enter username')
+              input.input100(type='text' name='last_name' placeholder='Фамилия', value=last_name)
+              span.focus-input100
+            .wrap-input100.validate-input.m-b-16(data-validate='Please enter username')
+              input.input100(type='text' name='mail' placeholder='Почта', value=mail)
+              span.focus-input100
+            .wrap-input100.validate-input.m-b-16(data-validate='Please enter username')
+              input.input100(type='text' name='password' placeholder='Пароль')
+              span.focus-input100
+            .wrap-input100.validate-input(data-validate='Please enter password')
+              input.input100(type='password' name='repeat_password' placeholder='Повторите пароль')
+              span.focus-input100
+            .container-login100-form-btn
+              button.login100-form-btn
+                | Зарегистрироваться

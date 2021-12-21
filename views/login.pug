@@ -1,30 +1,37 @@
 doctype html
-html(lang="en")
+html(lang='en')
   head
-    meta(charset="UTF-8")
-    meta(http-equiv="X-UA-Compatible", content="IE=edge")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Вход | ВДеле
+    title Регистрация
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    link(rel='stylesheet' type='text/css' href='css/login_util.css')
+    link(rel='stylesheet' type='text/css' href='css/login_main.css')
+    link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap')
+    style.
+      * {
+      font-family: Roboto !important;
+      }
   body
-    form(action='/login', method='post')
-      label(for='login') Почта или никнейм
-      br
-      input#login(name='login', type='text', required='required')
-      br
-      br
-      label(for='password') Пароль
-      br
-      input#password(name='password', type='password', required='required')
-      br
-      br
-      input#remember(name='remember', type='checkbox')
-      label(for='remember') Запомнить меня на месяц
-      br
-      br
-      input(type="submit", value="Войти")
-      if incorrect_login
-        label Неверный логин
-      else if incorrect_password
-        label Неверный пароль
-      else if success
-        label Вход успешный!
+    .limiter
+      .container-login100
+        .wrap-login100
+          form.login100-form.validate-form.p-l-55.p-r-55.p-t-178(method="post", action="/login")
+            span.login100-form-title
+              | Вход
+            .wrap-input100.validate-input.m-b-16(data-validate='Please enter username')
+              input.input100(type='text' name='login' placeholder='Почта или никнейм')
+              span.focus-input100
+            .wrap-input100.validate-input(data-validate='Please enter password')
+              input.input100(type='password' name='password' placeholder='Пароль')
+              span.focus-input100
+
+              if incorrect_login
+                label Неверный логин
+              else if incorrect_password
+                label Неверный пароль
+              else if success
+                label Вход успешный!
+
+            .container-login100-form-btn
+              button.login100-form-btn
+                | Войти
