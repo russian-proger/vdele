@@ -3,6 +3,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
+  devtool: 'source-map',
   entry: {
     network_app: "./source/network_app/index.js"
   },

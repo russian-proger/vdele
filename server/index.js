@@ -129,6 +129,13 @@ function addNewUser(data) {
   });
 }
 
+async function deleteSignToken(user_id, token) {
+  const [rows, fields] = await poolPromise.execute(
+    'DELETE FROM sign_token WHERE token=? AND user_id=?'
+    , [token, user_id]
+  );
+}
+
 async function addNewSignToken(user_id, token, end_date) {
   const [rows, fields] = await poolPromise.execute(
     'INSERT INTO sign_token (token, user_id, end_dt) VALUES (?, ?, ?)'
@@ -205,7 +212,13 @@ async function getUserByCookie(cookies) {
   return await getUserBySignToken(cookies.user_id, cookies.sign_token);
 }
 
-
+function checkNetworkApp(req, res) {
+  if (req.is_auth) {
+    return res.render('netapp', {user: JSON.stringify({...req.user_info, token: undefined, password: undefined }) });
+  } else {
+    return res.redirect('/');
+  }
+}
 
 
 
@@ -241,8 +254,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Main route
 app.get('/', (req, res) => {
-  if (req.is_auth)  {
-    return res.render('netapp', {user: JSON.stringify({...req.user_info, token: undefined }) });
+  if (req.is_auth) {
+    return res.render('netapp', {user: JSON.stringify({...req.user_info, token: undefined, password: undefined }) });
   }
   sendView(res, 'welcome.html');
 });
@@ -313,6 +326,15 @@ app.post('/signup', async (req, res) => {
 
 app.get('/auth_vk', (req, res) => {
   sendView(res, 'auth_vk.html');
+});
+
+app.all('/profile/:user_id', (req, res) => {
+  return checkNetworkApp(req, res);
+});
+
+app.all('/quit', async (req, res) => {
+  if (req.is_auth) await deleteSignToken(req.user_info.id, req.user_info.token);
+  return res.redirect('/');
 });
 
 // Folders

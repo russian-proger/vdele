@@ -15,7 +15,7 @@ import('./sass/style.sass');
 
 const theme = createTheme({
   palette: {
-    type: "dark",
+    type: "light",
     primary: {
       light: blueGrey[300],
       main: blueGrey[800],
