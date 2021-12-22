@@ -100,7 +100,7 @@ export default function OrganizationProjects(props) {
       <TextField onChange={onChangeSearchText} value={state.search_text} size="small" className={classes.search} label="Поиск" variant="outlined" />
       { props.rights && props.rights.right_id != 2 &&
         <ThemeProvider theme={green_theme}>
-          <Button onClick={() => navigate('/new_organization_project', {state: props.orgInfo})} variant="contained" color="primary">Создать</Button>
+          <Button onClick={() => navigate('/new_organization_project', {state: props.orgInfo})} variant="contained" color="primary">Добавить</Button>
         </ThemeProvider>
       }
     </Toolbar>

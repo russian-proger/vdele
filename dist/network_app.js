@@ -21994,7 +21994,7 @@ function OrganizationProjects(props) {
     },
     variant: "contained",
     color: "primary"
-  }, "\u0421\u043E\u0437\u0434\u0430\u0442\u044C"))), state.users.map(function (user, id) {
+  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C"))), state.users.map(function (user, id) {
     var createdDate = new Date(user.created_dt);
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       key: id

@@ -374,7 +374,7 @@ app.post('/login', async (req, res) => {
     const token = `${uinfo.id}_${key}`;
     let cookieOptions = new Object();
 
-    if (data.remember) {
+    if (data.remember || true) {
       cookieOptions.expires = new Date(Date.now() + 28*24*60*60*1000);
       addNewSignToken(uinfo.id, token, cookieOptions.expires);
     } else {
