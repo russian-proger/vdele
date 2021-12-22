@@ -26,6 +26,7 @@ import Core from '../core/Core';
 import { int_expr } from '../tools/expressions';
 
 import UserOrganizations from './UserOrganizations';
+import UserProjects from './UserProjects';
 
 const useStyles = makeStyles((theme) => ({
   root_container: {
@@ -134,7 +135,7 @@ export default function Main() {
             </Tabs>
             <Divider />
             <TabPanel index={0} value={pageID}>
-
+              <UserProjects />
             </TabPanel>
 
             <TabPanel index={1} value={pageID}>

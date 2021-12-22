@@ -24,6 +24,7 @@ import { createTheme, makeStyles, ThemeProvider } from '@material-ui/core/styles
 import green from '@material-ui/core/colors/green';
 
 import Core from '../core/Core';
+import { isSubString } from '../tools/string';
 
 const useStyles = makeStyles((theme) => ({
   search: {
@@ -67,22 +68,34 @@ export default function UserOrganizations(props) {
   const params = useParams();
   const navigate = useNavigate();
   const [state, setState] = React.useState({
-    orgs: []
+    _orgs: [],
+    orgs: [],
+    search_text: ''
   });
   
   React.useState(() => {
-    Core.Network.getOrganizations().then(res => {
-      console.log(res);
-      setState({...state, orgs: res.data});
+    Core.Network.getOrganizations(window.user_info.id).then(res => {
+      setState({...state, _orgs: res.data, orgs: res.data});
     });
   }, []);
+
+  function onChangeSearchText(ev) {
+    const search_text = ev.currentTarget.value;
+    let orgs = state._orgs;
+    
+    if (search_text.length != 0) {
+      orgs = state._orgs.filter(org => isSubString(search_text, org.name));
+    }
+
+    setState({...state, search_text, orgs});
+  }
 
   const pad = (s) => (s < 10) ? '0' + s : s;
 
   return (
   <>
     <Toolbar>
-      <TextField size="small" className={classes.search} label="Поиск" variant="outlined" />
+      <TextField onChange={onChangeSearchText} value={state.search_text} size="small" className={classes.search} label="Поиск" variant="outlined" />
       <ThemeProvider theme={green_theme}>
         <Button onClick={() => navigate('/new_organization')} variant="contained" color="primary">Создать</Button>
       </ThemeProvider>

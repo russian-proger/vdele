@@ -29,7 +29,7 @@ import LockIcon from '@material-ui/icons/Lock';
 import { createTheme, makeStyles, } from '@material-ui/core/styles';
 
 import Core from '../core/Core';
-import { orgname_expr } from '../tools/expressions';
+import { projname_expr } from '../tools/expressions';
 
 import SuccessButton from '../components/SuccessButton';
 
@@ -75,23 +75,25 @@ export default function Main() {
 
   function onCreate() {
     setState({...state, creating: true});
-    Core.Network.createOrganization(state.projectName, state.privacy).then(() => {
+    Core.Network.createUserProject(state.projectName, state.privacy).then(() => {
       setTimeout(() => {
-        navigate(`/profile/${window.user_info.user_id}/organizations`);
+        navigate(`/profile/${window.user_info.user_id}/projects`);
       }, 500);
     });
   }
 
-  const isValid = orgname_expr.test(state.projectName);
+  const isValid = projname_expr.test(state.projectName);
 
   return (
     <Container className={classes.root_container} maxWidth="md">
-      <Typography variant="h5">Создание новой организации</Typography>
-      <Typography style={{color: '#555555'}} variant="body2">Организация может иметь проекты, а также сотрудников с разными правами доступа</Typography>
+      <Typography variant="h5">Создание нового проекта</Typography>
+      <Typography style={{color: '#555555'}} variant="body2">Проект упрощает работу ваших сотрудников, каждый из которых обладает определёнными правами доступа</Typography>
       <br/><Divider/><br/>
       <Paper style={{paddingBottom: '1px'}}>
-        <br/>
         <Toolbar>
+          <Avatar className={classes.avatar} src={`profile_photos/${window.user_info.photo_name}`} />
+          <Typography variant="body1">{window.user_info.nick}</Typography>
+          <Typography style={{marginRight: 15, marginLeft: 15}} variant="h4">/</Typography>
           <TextField onChange={(ev) => setState({...state, projectName: ev.currentTarget.value})} className={classes.project_field} size="small" id="outlined-basic" label="Название организации" variant="outlined" value={state.projectName} />
         </Toolbar>
         <br/><Divider/>
@@ -101,14 +103,14 @@ export default function Main() {
             <RadioGroup aria-label="privacy" value={state.privacy} onChange={(ev, privacy) => setState({...state, privacy})}>
               <FormControlLabel value="public" control={<Radio className={classes.radio} color="primary" />} label={PrivacyLabel(PublicIcon, '#555555', "Публичный", "Видно всем пользователям")} />
               <div style={{width:1, height:7}}/>
-              <FormControlLabel value="private" control={<Radio className={classes.radio} color="primary" />} label={PrivacyLabel(LockIcon, '#9a6700', "Приватный", "Видно только сотрудникам организации")} />
+              <FormControlLabel value="private" control={<Radio className={classes.radio} color="primary" />} label={PrivacyLabel(LockIcon, '#9a6700', "Приватный", "Видно только участникам проекта")} />
             </RadioGroup>
           </FormControl>
         </Box>
       </Paper>
       <br/>
       <SuccessButton disabled={!isValid || state.creating} onClick={onCreate}>
-        {"Создать организацию"}
+        {"Создать проект"}
         {state.creating && <CircularProgress style={{marginLeft: 10}} size={25} />}
       </SuccessButton>
     </Container>

@@ -151,6 +151,20 @@ async function createOrganization(user_id, name, logo_name, privacy_id) {
   );
 }
 
+async function createUserProject(user_id, name, privacy_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `CALL CreateUserProject(?, ?, ?)`,
+    [user_id, name, 1 - privacy_id]
+  );
+}
+
+async function createProject(user_id, name, privacy_id) {
+  const [rows, fields] = await poolPromise.execute(
+    'CALL CreateProject(?, ?, ?, ?);'
+    , [user_id, name, 1 - privacy_id, logo_name]
+  );
+}
+
 async function addNewSignToken(user_id, token, end_date) {
   const [rows, fields] = await poolPromise.execute(
     'INSERT INTO sign_token (token, user_id, end_dt) VALUES (?, ?, ?)'
@@ -166,14 +180,21 @@ async function getUserBySignToken(user_id, token) {
   return rows[0];
 }
 
-async function getOrganizations(user_id) {
+async function getOrganizations(user_id, onlyPublic=true) {
   const [rows, fields] = await poolPromise.execute(
-    'SELECT * FROM user_organizations WHERE user_id=?',
+    `SELECT * FROM user_organizations WHERE user_id=? ${onlyPublic ? 'AND public=1' : ''}`,
     [user_id]
   );
   return rows;
 }
 
+async function getUserProjects(user_id, onlyPublic=true) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM user_projects WHERE user_id=? ${onlyPublic ? 'AND public=1' : ''}`,
+    [user_id]
+  );
+  return rows;
+}
 
 function isValidMail(mail) {
   if (mail.length > 64) return false;
@@ -357,6 +378,7 @@ const networkAppHandle = (req, res) => {
 };
 app.use('/profile/:user_id', networkAppHandle);
 app.use('/new_organization', networkAppHandle);
+app.use('/new_project', networkAppHandle);
 
 app.all('/quit', async (req, res) => {
   if (req.is_auth) await deleteSignToken(req.user_info.id, req.user_info.token);
@@ -394,12 +416,15 @@ apiRoute.post('/get_user', async (req, res) => {
   return res.send(JSON.stringify({data: uinfo}));
 });
 
-apiRoute.post('/get_projects', (req, res) => {
-
+apiRoute.post('/get_user_projects', async (req, res) => {
+  if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
+  const rows = await getUserProjects(req.user_info.id, req.user_info.id != req.body.user_id);
+  return res.send(JSON.stringify({result: true, data: rows}));
 });
 
-apiRoute.post('/get_organizations', async (req, res) => {
-  const rows = await getOrganizations(req.user_info.id);
+apiRoute.post('/get_user_organizations', async (req, res) => {
+  if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
+  const rows = await getOrganizations(req.user_info.id, req.user_info.id != req.body.user_id);
   return res.send(JSON.stringify({result: true, data: rows}));
 });
 
@@ -412,6 +437,15 @@ apiRoute.post('/new_organization', async (req, res) => {
   const logo_name = `${body.name}_${Date.now()}.png`;
   await createOrganization(req.user_info.id, body.name, logo_name, privacy_values.indexOf(body.privacy));
   await image_tool.generateRandomImage(`${__dirname}/../resources/organization_photos/${logo_name}`, 1)
+  return res.send(JSON.stringify({result: true}));
+});
+
+apiRoute.post('/new_user_project', async (req, res) => {
+  const body = req.body;
+  if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
+  if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+
+  await createUserProject(req.user_info.id, body.name, privacy_values.indexOf(body.privacy));
   return res.send(JSON.stringify({result: true}));
 });
 
