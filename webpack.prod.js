@@ -5,6 +5,8 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   entry: {
+    network_app: "./source/network_app/index.js",
+    project_app: "./source/project_app/index.js"
   },
   output: {
     path: path.join(__dirname, "/dist"),

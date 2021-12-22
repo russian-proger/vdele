@@ -210,6 +210,22 @@ async function getUserOrgRights(user_id, org_id) {
   return rows[0];
 }
 
+async function getProject(project_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM project WHERE id=?`,
+    [project_id]
+  );
+  return rows[0];
+}
+
+async function getUserProjectRights(user_id, project_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM project_member WHERE user_id=? AND project_id=?`,
+    [user_id, project_id]
+  );
+  return rows[0];
+}
+
 async function getUserProjects(user_id, onlyPublic=true) {
   const [rows, fields] = await poolPromise.execute(
     `SELECT * FROM user_projects WHERE user_id=? ${onlyPublic ? 'AND public=1' : ''}`,
@@ -233,6 +249,15 @@ async function getOrganizationParticipants(org_id) {
   );
   return rows;
 }
+
+async function getProjectWorkspaces(proj_id) {
+  return (await poolPromise.execute(`SELECT * FROM workspace WHERE project_id=?`, [proj_id]))[0];
+}
+
+async function getProjectTasks(proj_id) {
+  return (await poolPromise.execute(`SELECT * FROM workspace_task WHERE project_id=?`, [proj_id]))[0];
+}
+
 
 function isValidMail(mail) {
   if (mail.length > 64) return false;
@@ -335,207 +360,268 @@ app.set("views", `${__dirname}/../views`);
 
 app.use(express.urlencoded({ extended: true }));
 
-// Main route
-app.get('/', (req, res) => {
-  if (req.is_auth) {
-    return res.render('netapp', {user: JSON.stringify({...req.user_info, token: undefined, password: undefined }) });
-  }
-  sendView(res, 'welcome.html');
-});
+// Direct routes
+{
+  app.get('/', (req, res) => {
+    if (req.is_auth) {
+      return res.render('netapp', {user: JSON.stringify({...req.user_info, token: undefined, password: undefined }) });
+    }
+    sendView(res, 'welcome.html');
+  });
 
-app.get('/login', (req, res) => {
-  if (req.is_auth) return res.redirect('/');
-  res.render('login', {});
-});
+  app.get('/favicon.ico', (req, res) => {
+    return res.sendFile(`${__dirname}/favicon.png`);
+  });
 
-app.post('/login', async (req, res) => {
-  if (req.is_auth) return res.redirect('/');
-  /** @type {SignInFormData} */
-  const data = req.body;
-  if (data && data.login && data.password) {
-    let uinfo;
-    if (expressions.mail_expr.test(data.login)) {
-      // login is a mail
-      uinfo = await getUserByMail(data.login);
-    } else if (expressions.nick_expr.test(data.login)) {
-      // login is a nickname
-      uinfo = await getUserByNick(data.login);
+  app.get('/login', (req, res) => {
+    if (req.is_auth) return res.redirect('/');
+    res.render('login', {});
+  });
+  
+  app.post('/login', async (req, res) => {
+    if (req.is_auth) return res.redirect('/');
+    /** @type {SignInFormData} */
+    const data = req.body;
+    if (data && data.login && data.password) {
+      let uinfo;
+      if (expressions.mail_expr.test(data.login)) {
+        // login is a mail
+        uinfo = await getUserByMail(data.login);
+      } else if (expressions.nick_expr.test(data.login)) {
+        // login is a nickname
+        uinfo = await getUserByNick(data.login);
+      } else {
+        return res.render('login', { incorrect_login: true });
+      }
+  
+      if (uinfo === undefined) {
+        return res.render('login', { incorrect_login: true });
+      } else if (uinfo.password != data.password) {
+        return res.render('login', { incorrect_password: true });
+      }
+  
+      const key = crypto.generateKeySync('hmac', { length: 256 }).export().toString("hex");
+      const token = `${uinfo.id}_${key}`;
+      let cookieOptions = new Object();
+  
+      if (data.remember || true) {
+        cookieOptions.expires = new Date(Date.now() + 28*24*60*60*1000);
+        addNewSignToken(uinfo.id, token, cookieOptions.expires);
+      } else {
+        addNewSignToken(uinfo.id, token, new Date(Date.now() + 24*60*60*1000));
+      }
+  
+      res.cookie('sign_token', token, cookieOptions);
+      res.cookie('user_id', uinfo.id, cookieOptions);
+      return res.redirect("/");
+    }
+  
+    return res.render('login', {});
+  });
+  
+  app.get('/signup', (req, res) => {
+    if (req.is_auth) return res.redirect('/');
+    res.render('signup', {});
+  });
+  
+  app.post('/signup', async (req, res) => {
+    if (req.is_auth) return res.redirect('/');
+    if (req.body && await isValidSignUpForm(req.body)) {
+      await addNewUser(req.body);
+  
+      return res.redirect('/login');
     } else {
-      return res.render('login', { incorrect_login: true });
+      res.render('signup', {...req.body});
     }
+    res.end();
+    return;
+  });
+  
+  app.get('/auth_vk', (req, res) => {
+    sendView(res, 'auth_vk.html');
+  });
+  
+  app.all('/quit', async (req, res) => {
+    if (req.is_auth) await deleteSignToken(req.user_info.id, req.user_info.token);
+    return res.redirect('/');
+  });
+}
 
-    if (uinfo === undefined) {
-      return res.render('login', { incorrect_login: true });
-    } else if (uinfo.password != data.password) {
-      return res.render('login', { incorrect_password: true });
-    }
 
-    const key = crypto.generateKeySync('hmac', { length: 256 }).export().toString("hex");
-    const token = `${uinfo.id}_${key}`;
-    let cookieOptions = new Object();
+// Network App
+{
+  const networkAppHandle = (req, res) => checkNetworkApp(req, res);
+  app.use('/profile/:user_id', networkAppHandle);
+  app.use('/new_organization', networkAppHandle);
+  app.use('/new_organization_project', networkAppHandle);
+  app.use('/new_project', networkAppHandle);
+  app.use('/organization/:org_id', networkAppHandle);
+}
 
-    if (data.remember || true) {
-      cookieOptions.expires = new Date(Date.now() + 28*24*60*60*1000);
-      addNewSignToken(uinfo.id, token, cookieOptions.expires);
-    } else {
-      addNewSignToken(uinfo.id, token, new Date(Date.now() + 24*60*60*1000));
-    }
-
-    res.cookie('sign_token', token, cookieOptions);
-    res.cookie('user_id', uinfo.id, cookieOptions);
-    return res.redirect("/");
-  }
-
-  return res.render('login', {});
-});
-
-app.get('/signup', (req, res) => {
-  if (req.is_auth) return res.redirect('/');
-  res.render('signup', {});
-});
-
-app.post('/signup', async (req, res) => {
-  if (req.is_auth) return res.redirect('/');
-  if (req.body && await isValidSignUpForm(req.body)) {
-    await addNewUser(req.body);
-
+// Project App
+app.all('/project/:project_id/', async (req, res) => {
+  if (!req.is_auth) {
+    /** @ignore */
     return res.redirect('/login');
-  } else {
-    res.render('signup', {...req.body});
   }
-  res.end();
-  return;
+  
+  if (!expressions.int_expr.test(req.params.project_id)) return res.redirect('/');
+  const project = await getProject(req.params.project_id)
+  if (!project) res.redirect('/');
+  
+  let vars = ({
+    user: JSON.stringify({...req.user_info, token: undefined, password: undefined }),
+    project: JSON.stringify({...project })
+  });
+
+  if (project.org_id === null) {
+    // User project
+    const rights = await getUserProjectRights(req.user_info.id, req.params.project_id);
+    
+  } else {
+    // Org project
+  }
+  res.render('projapp', vars);
 });
 
-app.get('/auth_vk', (req, res) => {
-  sendView(res, 'auth_vk.html');
-});
 
-const networkAppHandle = (req, res) => {
-  return checkNetworkApp(req, res);
-};
-app.use('/profile/:user_id', networkAppHandle);
-app.use('/new_organization', networkAppHandle);
-app.use('/new_organization_project', networkAppHandle);
-app.use('/new_project', networkAppHandle);
-app.use('/organization/:org_id', networkAppHandle);
-
-app.all('/quit', async (req, res) => {
-  if (req.is_auth) await deleteSignToken(req.user_info.id, req.user_info.token);
-  return res.redirect('/');
-});
-
-
-// Folders
-app.use('/scripts', express.static(`${__dirname}/../source/scripts`));
-app.use('/css', express.static(`${__dirname}/../source/css`));
-app.use('/dist', express.static(`${__dirname}/../dist`));
-app.use('/profile_photos', express.static(`${__dirname}/../resources/profile_photos`));
-app.use('/organization_photos', express.static(`${__dirname}/../resources/organization_photos`));
+// Virual Folders
+{
+  app.use('/scripts', express.static(`${__dirname}/../source/scripts`));
+  app.use('/css', express.static(`${__dirname}/../source/css`));
+  app.use('/dist', express.static(`${__dirname}/../dist`));
+  app.use('/profile_photos', express.static(`${__dirname}/../resources/profile_photos`));
+  app.use('/organization_photos', express.static(`${__dirname}/../resources/organization_photos`));
+}
 
 
 
 // --------------= API Route =----------------//
-const apiRoute = express.Router();
-apiRoute.use(express.json());
-// Auth-filter middleware
-apiRoute.use('/', (req, res, next) => {
-  if (!req.is_auth) {
-    res.sendStatus(401);
-    return res.end();
-  }
-  next();
-});
-
-apiRoute.post('/get_user', async (req, res) => {
-  /** @type {GetUserRequest} */
-  const body = req.body;
-  if (!body.user_id || !expressions.int_expr.test(body.user_id)) return res.sendStatus(400);
-
-  const uinfo = await getUserByID(body.user_id);
-  return res.send(JSON.stringify({data: uinfo}));
-});
-
-apiRoute.post('/get_user_projects', async (req, res) => {
-  if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
-  const rows = await getUserProjects(req.user_info.id, req.user_info.id != req.body.user_id);
-  return res.send(JSON.stringify({result: true, data: rows}));
-});
-
-apiRoute.post('/get_user_organizations', async (req, res) => {
-  if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
-  const rows = await getUserOrganizations(req.user_info.id, req.user_info.id != req.body.user_id);
-  return res.send(JSON.stringify({result: true, data: rows}));
-});
-
-apiRoute.post('/get_organization', async (req, res) => {
-  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
-  const organization = await getOrganization(req.body.org_id);
-  if (!organization) return res.send(JSON.stringify({result: true, data: undefined}));
+{
+  const apiRoute = express.Router();
+  apiRoute.use(express.json());
+  // Auth-filter middleware
+  apiRoute.use('/', (req, res, next) => {
+    if (!req.is_auth) {
+      res.sendStatus(401);
+      return res.end();
+    }
+    next();
+  });
   
-  const member = await getUserOrgRights(req.user_info.id, req.body.org_id);
-  if (organization.public) {
-    return res.send(JSON.stringify({result: true, data: organization, rights: member}));
-  }
+  apiRoute.post('/get_user', async (req, res) => {
+    /** @type {GetUserRequest} */
+    const body = req.body;
+    if (!body.user_id || !expressions.int_expr.test(body.user_id)) return res.sendStatus(400);
+  
+    const uinfo = await getUserByID(body.user_id);
+    return res.send(JSON.stringify({data: uinfo}));
+  });
+  
+  apiRoute.post('/get_user_projects', async (req, res) => {
+    if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
+    const rows = await getUserProjects(req.user_info.id, req.user_info.id != req.body.user_id);
+    return res.send(JSON.stringify({result: true, data: rows}));
+  });
+  
+  apiRoute.post('/get_user_organizations', async (req, res) => {
+    if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
+    const rows = await getUserOrganizations(req.user_info.id, req.user_info.id != req.body.user_id);
+    return res.send(JSON.stringify({result: true, data: rows}));
+  });
+  
+  apiRoute.post('/get_organization', async (req, res) => {
+    if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+    const organization = await getOrganization(req.body.org_id);
+    if (!organization) return res.send(JSON.stringify({result: true, data: undefined}));
+    
+    const member = await getUserOrgRights(req.user_info.id, req.body.org_id);
+    if (organization.public) {
+      return res.send(JSON.stringify({result: true, data: organization, rights: member}));
+    }
+  
+    if (member != undefined) {
+      return res.send(JSON.stringify({result: true, data: organization, rights: member}));
+    } else {
+      return res.send(JSON.stringify({result: true, data: null, rights: member}));
+    }
+  });
+  
+  apiRoute.post('/get_organization_projects', async (req, res) => {
+    if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+    const member = await getUserOrgRights(req.user_info.id, req.body.org_id);
+    const organization = await getOrganization(req.body.org_id);
+    if (!organization) return res.send(JSON.stringify({result: false, reason: 1}));
+    if (!organization.public && !member) return res.send(JSON.stringify({result: false, reason: 2}));
+  
+    const onlyPublic = !member || member.right_id == 2;
+    const projects = await getOrganizationProjects(req.user_info.id, req.body.org_id, onlyPublic);
+    return res.send(JSON.stringify({result: true, data: projects}));
+  });
+  
+  apiRoute.post('/get_organization_participants', async (req, res) => {
+    if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+    const participants = await getOrganizationParticipants(req.body.org_id);
+    return res.send(JSON.stringify({result: true, data: participants}));
+  });
 
-  if (member != undefined) {
-    return res.send(JSON.stringify({result: true, data: organization, rights: member}));
-  } else {
-    return res.send(JSON.stringify({result: true, data: null, rights: member}));
-  }
-});
+  apiRoute.post('/get_project_workspaces', async (req, res) => {
+    const body = req.body;
+    if (!body.proj_id || !expressions.int_expr.test(body.proj_id)) return res.sendStatus(400);
+    const workspaces = await getProjectWorkspaces(body.proj_id);
+    return res.send(JSON.stringify({result: 1, data: workspaces}));
+  });
 
-apiRoute.post('/get_organization_projects', async (req, res) => {
-  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
-  const member = await getUserOrgRights(req.user_info.id, req.body.org_id);
-  const organization = await getOrganization(req.body.org_id);
-  if (!organization) return res.send(JSON.stringify({result: false, reason: 1}));
-  if (!organization.public && !member) return res.send(JSON.stringify({result: false, reason: 2}));
+  apiRoute.post('/get_project_tasks', async (req, res) => {
+    const body = req.body;
+    if (!body.proj_id || !expressions.int_expr.test(body.proj_id)) return res.sendStatus(400);
+    const tasks = await getProjectTasks(body.proj_id);
+    return res.send(JSON.stringify({result: 1, data: tasks}));
+  });
+  
+  apiRoute.post('/new_organization_project', async (req, res) => {
+    const body = req.body;
+    if (!body.org_id || !expressions.int_expr.test(body.org_id)) return res.send(JSON.stringify({result: false, reason: 1}));
+    if (!body.name || !expressions.orgname_expr.test(body.name)) return res.send(JSON.stringify({result: false, reason: 2}));
+    if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.send(JSON.stringify({result: false, reason: 3}));
+  
+    await createOrganizationProject(req.user_info.id, body.org_id, body.name, privacy_values.indexOf(body.privacy));
+    return res.send(JSON.stringify({result: true}));
+  })
+  
+  const privacy_values = ['public', 'private'];
+  apiRoute.post('/new_organization', async (req, res) => {
+    const body = req.body;
+    if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
+    if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+  
+    const logo_name = `${body.name}_${Date.now()}.png`;
+    await createOrganization(req.user_info.id, body.name, logo_name, privacy_values.indexOf(body.privacy));
+    await image_tool.generateRandomImage(`${__dirname}/../resources/organization_photos/${logo_name}`, 1)
+    return res.send(JSON.stringify({result: true}));
+  });
+  
+  // apiRoute.post('/new_user_project', async (req, res) => {
+  //   const body = req.body;
+  //   if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
+  //   if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+  
+  //   await createUserProject(req.user_info.id, body.name, privacy_values.indexOf(body.privacy));
+  //   return res.send(JSON.stringify({result: true}));
+  // });
 
-  const onlyPublic = !member || member.right_id == 2;
-  const projects = await getOrganizationProjects(req.user_info.id, req.body.org_id, onlyPublic);
-  return res.send(JSON.stringify({result: true, data: projects}));
-});
-
-apiRoute.post('/get_organization_participants', async (req, res) => {
-  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
-  const participants = await getOrganizationParticipants(req.body.org_id);
-  return res.send(JSON.stringify({result: true, data: participants}));
-});
-
-apiRoute.post('/new_organization_project', async (req, res) => {
-  const body = req.body;
-  if (!body.org_id || !expressions.int_expr.test(body.org_id)) return res.send(JSON.stringify({result: false, reason: 1}));
-  if (!body.name || !expressions.orgname_expr.test(body.name)) return res.send(JSON.stringify({result: false, reason: 2}));
-  if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.send(JSON.stringify({result: false, reason: 3}));
-
-  await createOrganizationProject(req.user_info.id, body.org_id, body.name, privacy_values.indexOf(body.privacy));
-  return res.send(JSON.stringify({result: true}));
-})
-
-const privacy_values = ['public', 'private'];
-apiRoute.post('/new_organization', async (req, res) => {
-  const body = req.body;
-  if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
-  if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
-
-  const logo_name = `${body.name}_${Date.now()}.png`;
-  await createOrganization(req.user_info.id, body.name, logo_name, privacy_values.indexOf(body.privacy));
-  await image_tool.generateRandomImage(`${__dirname}/../resources/organization_photos/${logo_name}`, 1)
-  return res.send(JSON.stringify({result: true}));
-});
-
-apiRoute.post('/new_user_project', async (req, res) => {
-  const body = req.body;
-  if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
-  if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
-
-  await createUserProject(req.user_info.id, body.name, privacy_values.indexOf(body.privacy));
-  return res.send(JSON.stringify({result: true}));
-});
-
-
-app.use('/api', apiRoute);
+  apiRoute.post('/new_user_project', async (req, res) => {
+    const body = req.body;
+    if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
+    if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+  
+    await createUserProject(req.user_info.id, body.name, privacy_values.indexOf(body.privacy));
+    return res.send(JSON.stringify({result: true}));
+  });
+  
+  
+  app.use('/api', apiRoute);
+}
 
 
 

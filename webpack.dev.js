@@ -5,7 +5,8 @@ module.exports = {
   mode: 'development',
   devtool: 'source-map',
   entry: {
-    network_app: "./source/network_app/index.js"
+    network_app: "./source/network_app/index.js",
+    project_app: "./source/project_app/index.js"
   },
   output: {
     path: path.join(__dirname, "/dist"),

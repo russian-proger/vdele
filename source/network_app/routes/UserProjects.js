@@ -111,7 +111,7 @@ export default function UserProjects(props) {
         <div key={id}>
           <Divider/><br/>
             <Toolbar>
-              <Button className={classes.project_button} key={id}>
+              <Button onClick={() => window.open(`/project/${project.id}`, '_self')} className={classes.project_button} key={id}>
                 <div className={classes.project_name_wrapper}>
                   <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{project.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][project.public]}</sup></span></Typography>
                   <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Работник"][project.right_id]}</Typography>
