@@ -226,6 +226,14 @@ async function getOrganizationProjects(user_id, org_id, onlyPublic=true) {
   return rows;
 }
 
+async function getOrganizationParticipants(org_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM organization_member AS om LEFT JOIN user ON om.user_id=user.id WHERE om.org_id=?`,
+    [org_id]
+  );
+  return rows;
+}
+
 function isValidMail(mail) {
   if (mail.length > 64) return false;
   return expressions.mail_expr.test(mail);
@@ -491,7 +499,8 @@ apiRoute.post('/get_organization_projects', async (req, res) => {
 
 apiRoute.post('/get_organization_participants', async (req, res) => {
   if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
-  
+  const participants = await getOrganizationParticipants(req.body.org_id);
+  return res.send(JSON.stringify({result: true, data: participants}));
 });
 
 apiRoute.post('/new_organization_project', async (req, res) => {

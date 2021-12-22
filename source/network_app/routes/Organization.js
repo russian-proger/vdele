@@ -151,7 +151,7 @@ export default function Main() {
             </TabPanel>
 
             <TabPanel index={1} value={pageID}>
-              <OrganizationParticipants orgInfo={state.orgInfo} />
+              <OrganizationParticipants rights={state.rights} orgInfo={state.orgInfo} />
             </TabPanel>
           </Paper>
         </Grid>
