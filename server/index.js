@@ -180,6 +180,14 @@ async function createTask(ws_id, name, descr) {
   );
 }
 
+async function getTask(task_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM task WHERE id=?`,
+    [task_id]
+  );
+  return rows[0];
+}
+
 async function deleteProjectWorkspace(ws_id) {
   const [rows, fields] = await poolPromise.execute(
     `CALL DeleteProjectWorkspace(?)`,
@@ -666,6 +674,14 @@ app.all('/project/:project_id/', async (req, res) => {
 
     await createTask(body.ws_id, body.name, body.descr);
     return res.send(JSON.stringify({result: true}));
+  });
+
+  apiRoute.post('/get_task', async (req, res) => {
+    const body = req.body;
+    if (!body.task_id || !expressions.int_expr.test(body.task_id)) return res.sendStatus(400);
+
+    const task = await getTask(body.task_id);
+    return res.send(JSON.stringify({result: true, data: task}));
   });
   
   apiRoute.post('/rem_project_workspace', async (req, res) => {

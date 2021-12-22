@@ -52,6 +52,8 @@ export default function Network(self) {
   this.addParticipantToProject = (nick, proj_id) => this.requestAPI('add_participant_to_project', {nick, proj_id});
   this.deleteParticipantFromProject = (user_id, proj_id) => this.requestAPI('rem_participant_from_project', {user_id, proj_id});
 
+  this.getTask = (task_id) => this.requestAPI('get_task', {task_id});
+
   
 
   this.createTask = (ws_id, name, descr) => this.requestAPI('new_task', {ws_id, name, descr});

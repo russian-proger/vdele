@@ -149,7 +149,9 @@ function Participants(props) {
     { state.users.map((user, x) => (
       <ListItem key={x}>
         <ListItemAvatar>
-          <Avatar src={`/profile_photos/${user.photo_name}`} />
+          <IconButton onClick={() => window.open(`/profile/${user.id}`, '_self')}>
+            <Avatar src={`/profile_photos/${user.photo_name}`} />
+          </IconButton>
         </ListItemAvatar>
         <ListItemText>{user.first_name} {user.second_name}</ListItemText>
         <ListItemSecondaryAction>
@@ -162,6 +164,29 @@ function Participants(props) {
     }
   </List>
 </>
+  )
+}
+
+function TaskViewer(props) {
+  const [state, setState] = React.useState({
+
+    loading: true,
+    user_nick: ''
+  })
+
+  React.useEffect(() => {
+    Core.Network.getTask(props.task_id).then(res => {
+      setState({...state, loading: false, task: res.data});
+    })
+  }, []);
+
+  if (state.loading) return <CircularProgress />
+
+  return (
+    <Box m={3}>
+      <Typography variant="h6">{state.task.name}</Typography>
+      <Typography variant="body2">{state.task.description}</Typography>
+    </Box>
   )
 }
 
@@ -233,6 +258,10 @@ export default function App(_props) {
     Core.Network.createTask(state.currentWorkspace, state.newTaskName, state.newTaskDescription);
     setModal({name: ''});
     setState({...state, newTaskName: '', newTaskDescription: ''});
+  }
+
+  function openTask(task_id) {
+    setModal({name: 'task_view', task_id});
   }
 
   const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.workspace_id == state.currentWorkspace);
@@ -336,7 +365,7 @@ export default function App(_props) {
                 <Paper className={classes.tasksList}>
                   <Typography variant="h6" style={{padding: 5, paddingLeft: 20, fontSize: '16px'}}>{title}</Typography>
                   { tasks.filter(task => task.state_id == state_id).map((task, x) => (
-                    <div key={x} className="task">{task.name}</div>
+                    <div onClick={() => openTask(task.id)} key={x} className="task">{task.name}</div>
                   )) }
                   {!state_id && state.currentWorkspace != -1 &&
                   <>
@@ -369,6 +398,15 @@ export default function App(_props) {
             <Typography align="center" variant="h5">Участники</Typography>
             <Divider/><br/>
             <Participants />
+          </div>
+        </div>
+      </Modal>
+      <Modal open={modal.name == "task_view"} onClose={() => setModal({name: ''})}>
+        <div className="modal_window_wrapper">
+          <div className="modal_window">
+            <Typography align="center" variant="h5">Просмотр задачи</Typography>
+            <Divider/><br/>
+            <TaskViewer task_id={modal.task_id} />
           </div>
         </div>
       </Modal>
