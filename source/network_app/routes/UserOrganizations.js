@@ -67,6 +67,7 @@ export default function UserOrganizations(props) {
   const classes = useStyles();
   const params = useParams();
   const navigate = useNavigate();
+  const my_profile = (params.user_id == window.user_info.id);
   const [state, setState] = React.useState({
     _orgs: [],
     orgs: [],
@@ -100,9 +101,11 @@ export default function UserOrganizations(props) {
   <>
     <Toolbar>
       <TextField onChange={onChangeSearchText} value={state.search_text} size="small" className={classes.search} label="Поиск" variant="outlined" />
-      <ThemeProvider theme={green_theme}>
-        <Button onClick={() => navigate('/new_organization')} variant="contained" color="primary">Создать</Button>
-      </ThemeProvider>
+      {my_profile &&
+        <ThemeProvider theme={green_theme}>
+          <Button onClick={() => navigate('/new_organization')} variant="contained" color="primary">Создать</Button>
+        </ThemeProvider>
+      }
     </Toolbar>
     {state.orgs.map((org, id) => {
       const createdDate = new Date(org.created_dt)

@@ -22303,6 +22303,7 @@ function UserOrganizations(props) {
   var classes = useStyles();
   var params = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useParams)();
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useNavigate)();
+  var my_profile = params.user_id == window.user_info.id;
 
   var _React$useState = react__WEBPACK_IMPORTED_MODULE_0__.useState({
     _orgs: [],
@@ -22353,7 +22354,7 @@ function UserOrganizations(props) {
     className: classes.search,
     label: "\u041F\u043E\u0438\u0441\u043A",
     variant: "outlined"
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__.default, {
+  }), my_profile && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__.default, {
     theme: green_theme
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__.default, {
     onClick: function onClick() {
@@ -22708,6 +22709,7 @@ function UserProjects(props) {
   var classes = useStyles();
   var params = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useParams)();
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useNavigate)();
+  var my_profile = params.user_id == window.user_info.id;
 
   var _React$useState = react__WEBPACK_IMPORTED_MODULE_0__.useState({
     projects: [],
@@ -22754,7 +22756,7 @@ function UserProjects(props) {
     className: classes.search,
     label: "\u041F\u043E\u0438\u0441\u043A",
     variant: "outlined"
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__.default, {
+  }), my_profile && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__.default, {
     theme: green_theme
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__.default, {
     onClick: function onClick() {

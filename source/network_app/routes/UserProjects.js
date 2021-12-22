@@ -68,6 +68,7 @@ export default function UserProjects(props) {
   const classes = useStyles();
   const params = useParams();
   const navigate = useNavigate();
+  const my_profile = (params.user_id == window.user_info.id);
   const [state, setState] = React.useState({
     projects: [],
     _projects: [],
@@ -98,9 +99,11 @@ export default function UserProjects(props) {
   <>
     <Toolbar>
       <TextField onChange={onChangeSearchText} value={state.search_text} size="small" className={classes.search} label="Поиск" variant="outlined" />
-      <ThemeProvider theme={green_theme}>
-        <Button onClick={() => navigate('/new_project')} variant="contained" color="primary">Создать</Button>
-      </ThemeProvider>
+      { my_profile &&
+        <ThemeProvider theme={green_theme}>
+          <Button onClick={() => navigate('/new_project')} variant="contained" color="primary">Создать</Button>
+        </ThemeProvider>
+      }
     </Toolbar>
     {state.projects.map((project, id) => {
       const createdDate = new Date(project.created_dt)
