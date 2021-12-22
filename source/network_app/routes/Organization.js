@@ -17,7 +17,7 @@ import {
 } from '@material-ui/core';
 
 import WorkOutlineIcon from '@material-ui/icons/WorkOutline';
-import ApartmentIcon from '@material-ui/icons/Apartment';
+import PeopleIcon from '@material-ui/icons/People';
 
 import { createTheme, makeStyles, } from '@material-ui/core/styles';
 
@@ -26,9 +26,10 @@ import Core from '../core/Core';
 import { int_expr } from '../tools/expressions';
 
 import DestructButton from '../components/DestructButton';
+import SuccessButton from '../components/SuccessButton';
 
-import UserOrganizations from './UserOrganizations';
-import UserProjects from './UserProjects';
+import OrganizationProjects from './OrganizationProjects';
+import OrganizationParticipants from './OrganizationParticipants';
 
 const useStyles = makeStyles((theme) => ({
   root_container: {
@@ -57,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const pages = ['projects', 'organizations'];
+const pages = ['projects', 'participants'];
 
 const IconTab = (Icon, text) => (
   <span style={{display: 'flex'}}><Icon style={{marginRight: 7}} fontSize="small" />{text}</span>
@@ -92,7 +93,6 @@ export default function Main() {
   React.useEffect(() => {
     if (int_expr.test(params.org_id)) {
       Core.Network.getOrganization(params.org_id) .then(res => {
-        console.log(res);
         if (res.data === undefined) {
           setState({...state, orgExists: false, loading: false});
         } else if (res.data === null) {
@@ -106,7 +106,6 @@ export default function Main() {
     }
   }, [params.user_id]);
 
-  console.log(state);
   if (state.loading) {
     return <LinearProgress />;
   } else if (!state.orgExists) {
@@ -131,6 +130,9 @@ export default function Main() {
           {state.rights &&
             <DestructButton style={{width: '100%'}}>Покинуть</DestructButton>
           }
+          {!state.rights &&
+            <SuccessButton style={{width: '100%'}}>Вступить</SuccessButton>
+          }
           <Typography className={classes.created_date}>Дата создания: {createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</Typography>
 
         </Grid>
@@ -141,16 +143,16 @@ export default function Main() {
               value={pageID}
               onChange={(ev, ind) => navigate(`/organization/${state.orgInfo.id}/${pages[ind]}`) || forceUpdate()}>
               <Tab id="profile-tab-1" label={IconTab(WorkOutlineIcon, "Проекты")} />
-              <Tab id="profile-tab-2" label={IconTab(ApartmentIcon, "Организации")} />
+              <Tab id="profile-tab-2" label={IconTab(PeopleIcon, "Участники")} />
             </Tabs>
             <Divider />
-            {/* <TabPanel index={0} value={pageID}>
-              <UserProjects />
+            <TabPanel index={0} value={pageID}>
+              <OrganizationProjects rights={state.rights} orgInfo={state.orgInfo} />
             </TabPanel>
 
             <TabPanel index={1} value={pageID}>
-              <UserOrganizations />
-            </TabPanel> */}
+              <OrganizationParticipants orgInfo={state.orgInfo} />
+            </TabPanel>
           </Paper>
         </Grid>
       </Grid>

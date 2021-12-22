@@ -151,6 +151,12 @@ async function createOrganization(user_id, name, logo_name, privacy_id) {
   );
 }
 
+async function createOrganizationProject(org_id, name, privacy_id) {
+  const [rows, fields] = await poolPromise.execute(
+    'INSERT INTO project (name, created_dt, public, org_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?);', [name, 1 - privacy_id, org_id]
+  );
+}
+
 async function createUserProject(user_id, name, privacy_id) {
   const [rows, fields] = await poolPromise.execute(
     `CALL CreateUserProject(?, ?, ?)`,
@@ -208,6 +214,14 @@ async function getUserProjects(user_id, onlyPublic=true) {
   const [rows, fields] = await poolPromise.execute(
     `SELECT * FROM user_projects WHERE user_id=? ${onlyPublic ? 'AND public=1' : ''}`,
     [user_id]
+  );
+  return rows;
+}
+
+async function getOrganizationProjects(org_id, onlyPublic=true) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM project WHERE org_id=? ${onlyPublic ? 'AND public=1' : ''}`,
+    [org_id]
   );
   return rows;
 }
@@ -394,6 +408,7 @@ const networkAppHandle = (req, res) => {
 };
 app.use('/profile/:user_id', networkAppHandle);
 app.use('/new_organization', networkAppHandle);
+app.use('/new_organization_project', networkAppHandle);
 app.use('/new_project', networkAppHandle);
 app.use('/organization/:org_id', networkAppHandle);
 
@@ -461,13 +476,33 @@ apiRoute.post('/get_organization', async (req, res) => {
     return res.send(JSON.stringify({result: true, data: null, rights: member}));
   }
 });
+
 apiRoute.post('/get_organization_projects', async (req, res) => {
   if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
-});
-apiRoute.post('/get_organization_participants', async (req, res) => {
-  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+  const member = await getUserOrgRights(req.user_info.id, req.body.org_id);
+  const organization = await getOrganization(req.body.org_id);
+  if (!organization) return res.send(JSON.stringify({result: false, reason: 1}));
+  if (!organization.public && !member) return res.send(JSON.stringify({result: false, reason: 2}));
+
+  const onlyPublic = !member || member.right_id == 2;
+  const projects = await getOrganizationProjects(req.body.org_id, onlyPublic);
+  return res.send(JSON.stringify({result: true, data: projects}));
 });
 
+apiRoute.post('/get_organization_participants', async (req, res) => {
+  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+  
+});
+
+apiRoute.post('/new_organization_project', async (req, res) => {
+  const body = req.body;
+  if (!body.org_id || !expressions.int_expr.test(body.org_id)) return res.send(JSON.stringify({result: false, reason: 1}));
+  if (!body.name || !expressions.orgname_expr.test(body.name)) return res.send(JSON.stringify({result: false, reason: 2}));
+  if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.send(JSON.stringify({result: false, reason: 3}));
+
+  await createOrganizationProject(body.org_id, body.name, privacy_values.indexOf(body.privacy));
+  return res.send(JSON.stringify({result: true}));
+})
 
 const privacy_values = ['public', 'private'];
 apiRoute.post('/new_organization', async (req, res) => {

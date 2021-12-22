@@ -14,6 +14,7 @@ import UserProfile from '../routes/UserProfile';
 import NewOrganization from '../routes/NewOrganization';
 import Organization from '../routes/Organization';
 import NewProject from '../routes/NewProject';
+import NewOrgProject from '../routes/NewOrgProject';
 
 const useStyles = makeStyles((theme) => ({
 }));
@@ -32,6 +33,7 @@ export default function App(_props) {
         <Route path="/organization/:org_id/:page" element={<Organization />}></Route>
         <Route path="/new_organization" element={<NewOrganization />}></Route>
         <Route path="/new_project" element={<NewProject />}></Route>
+        <Route path="/new_organization_project" element={<NewOrgProject />}></Route>
       </Routes>
     </BrowserRouter>
   );

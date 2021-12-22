@@ -34,6 +34,7 @@ export default function Network(self) {
   this.getUser = (user_id) => this.requestAPI('get_user', { user_id });
   
   this.createOrganization = (name, privacy) => this.requestAPI('new_organization', { name, privacy });
+  this.createOrganizationProject = (org_id, name, privacy) => this.requestAPI('new_organization_project', { org_id, name, privacy });
   this.createUserProject = (name, privacy) => this.requestAPI('new_user_project', { name, privacy });
 
   this.getUserOrganizations = (user_id) => this.requestAPI('get_user_organizations', {user_id});
