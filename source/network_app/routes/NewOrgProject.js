@@ -66,8 +66,6 @@ export default function Main() {
   const navigate = useNavigate();
   const params = useParams();
 
-  console.log(location);
-
 
   const [state, setState] = React.useState({
     projectName: '',
@@ -97,7 +95,7 @@ export default function Main() {
           <Avatar className={classes.avatar} src={`organization_photos/${location.state.logo_name}`} />
           <Typography variant="body1">{location.state.name}</Typography>
           <Typography style={{marginRight: 15, marginLeft: 15}} variant="h4">/</Typography>
-          <TextField onChange={(ev) => setState({...state, projectName: ev.currentTarget.value})} className={classes.project_field} size="small" id="outlined-basic" label="Название организации" variant="outlined" value={state.projectName} />
+          <TextField onChange={(ev) => setState({...state, projectName: ev.currentTarget.value})} className={classes.project_field} size="small" id="outlined-basic" label="Название проекта" variant="outlined" value={state.projectName} />
         </Toolbar>
         <br/><Divider/>
         <Box m={4}>

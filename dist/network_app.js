@@ -21065,7 +21065,6 @@ function Main() {
   var location = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useLocation)();
   var navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useNavigate)();
   var params = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_6__.useParams)();
-  console.log(location);
 
   var _React$useState = react__WEBPACK_IMPORTED_MODULE_0__.useState({
     projectName: '',
@@ -21123,7 +21122,7 @@ function Main() {
     className: classes.project_field,
     size: "small",
     id: "outlined-basic",
-    label: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043E\u0440\u0433\u0430\u043D\u0438\u0437\u0430\u0446\u0438\u0438",
+    label: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
     variant: "outlined",
     value: state.projectName
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_8__.default, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_13__.default, {
@@ -21549,7 +21548,7 @@ function Main() {
     className: classes.project_field,
     size: "small",
     id: "outlined-basic",
-    label: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043E\u0440\u0433\u0430\u043D\u0438\u0437\u0430\u0446\u0438\u0438",
+    label: "\u041D\u0430\u0437\u0432\u0430\u043D\u0438\u0435 \u043F\u0440\u043E\u0435\u043A\u0442\u0430",
     variant: "outlined",
     value: state.projectName
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_8__.default, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_13__.default, {
@@ -22000,7 +21999,7 @@ function OrganizationProjects(props) {
     className: classes.search,
     label: "\u041F\u043E\u0438\u0441\u043A",
     variant: "outlined"
-  }), props.rights.right_id != 2 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__.default, {
+  }), props.rights && props.rights.right_id != 2 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_9__.default, {
     theme: green_theme
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__.default, {
     onClick: function onClick() {
@@ -22035,7 +22034,7 @@ function OrganizationProjects(props) {
       style: {
         fontSize: '14px'
       }
-    }, ["Владелец", "Менеджер", "Работник"][project.right_id])), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    }, project.right_id !== null ? ["Владелец", "Менеджер", "Работник"][project.right_id] : 'Вы не участвуете в данном проекте')), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
       style: {
         flexGrow: 1
       }

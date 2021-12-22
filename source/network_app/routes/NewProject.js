@@ -94,7 +94,7 @@ export default function Main() {
           <Avatar className={classes.avatar} src={`profile_photos/${window.user_info.photo_name}`} />
           <Typography variant="body1">{window.user_info.nick}</Typography>
           <Typography style={{marginRight: 15, marginLeft: 15}} variant="h4">/</Typography>
-          <TextField onChange={(ev) => setState({...state, projectName: ev.currentTarget.value})} className={classes.project_field} size="small" id="outlined-basic" label="Название организации" variant="outlined" value={state.projectName} />
+          <TextField onChange={(ev) => setState({...state, projectName: ev.currentTarget.value})} className={classes.project_field} size="small" id="outlined-basic" label="Название проекта" variant="outlined" value={state.projectName} />
         </Toolbar>
         <br/><Divider/>
         <Box m={4}>

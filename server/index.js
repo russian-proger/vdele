@@ -151,9 +151,9 @@ async function createOrganization(user_id, name, logo_name, privacy_id) {
   );
 }
 
-async function createOrganizationProject(org_id, name, privacy_id) {
-  const [rows, fields] = await poolPromise.execute(
-    'INSERT INTO project (name, created_dt, public, org_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?);', [name, 1 - privacy_id, org_id]
+async function createOrganizationProject(user_id, org_id, name, privacy_id) {
+  await poolPromise.execute(
+    'CALL CreateOrganizationProject(?, ?, ?, ?)', [user_id, org_id, name, 1 - privacy_id]
   );
 }
 
@@ -218,10 +218,10 @@ async function getUserProjects(user_id, onlyPublic=true) {
   return rows;
 }
 
-async function getOrganizationProjects(org_id, onlyPublic=true) {
+async function getOrganizationProjects(user_id, org_id, onlyPublic=true) {
   const [rows, fields] = await poolPromise.execute(
-    `SELECT * FROM project WHERE org_id=? ${onlyPublic ? 'AND public=1' : ''}`,
-    [org_id]
+    `SELECT * FROM project LEFT JOIN project_member AS pm ON pm.project_id=project.id WHERE org_id=? AND (pm.user_id IS NULL OR pm.user_id=?) ${onlyPublic ? 'AND public=1' : ''}`,
+    [org_id, user_id]
   );
   return rows;
 }
@@ -485,7 +485,7 @@ apiRoute.post('/get_organization_projects', async (req, res) => {
   if (!organization.public && !member) return res.send(JSON.stringify({result: false, reason: 2}));
 
   const onlyPublic = !member || member.right_id == 2;
-  const projects = await getOrganizationProjects(req.body.org_id, onlyPublic);
+  const projects = await getOrganizationProjects(req.user_info.id, req.body.org_id, onlyPublic);
   return res.send(JSON.stringify({result: true, data: projects}));
 });
 
@@ -500,7 +500,7 @@ apiRoute.post('/new_organization_project', async (req, res) => {
   if (!body.name || !expressions.orgname_expr.test(body.name)) return res.send(JSON.stringify({result: false, reason: 2}));
   if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.send(JSON.stringify({result: false, reason: 3}));
 
-  await createOrganizationProject(body.org_id, body.name, privacy_values.indexOf(body.privacy));
+  await createOrganizationProject(req.user_info.id, body.org_id, body.name, privacy_values.indexOf(body.privacy));
   return res.send(JSON.stringify({result: true}));
 })
 

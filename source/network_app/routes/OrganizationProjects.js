@@ -99,7 +99,7 @@ export default function OrganizationProjects(props) {
   <>
     <Toolbar>
       <TextField onChange={onChangeSearchText} value={state.search_text} size="small" className={classes.search} label="Поиск" variant="outlined" />
-      { props.rights.right_id != 2 &&
+      { props.rights && props.rights.right_id != 2 &&
         <ThemeProvider theme={green_theme}>
           <Button onClick={() => navigate('/new_organization_project', {state: props.orgInfo})} variant="contained" color="primary">Создать</Button>
         </ThemeProvider>
@@ -114,7 +114,7 @@ export default function OrganizationProjects(props) {
               <Button className={classes.project_button} key={id}>
                 <div className={classes.project_name_wrapper}>
                   <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{project.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][project.public]}</sup></span></Typography>
-                  <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Работник"][project.right_id]}</Typography>
+                  <Typography variant="body1" style={{fontSize: '14px'}}>{project.right_id !== null ? ["Владелец", "Менеджер", "Работник"][project.right_id] : 'Вы не участвуете в данном проекте'}</Typography>
                 </div>
                 <div style={{flexGrow: 1}}></div>
                 <Typography variant="body1" style={{fontSize: '14px'}}>Создано <b>{createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</b></Typography>
