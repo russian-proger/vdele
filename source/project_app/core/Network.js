@@ -45,9 +45,11 @@ export default function Network(self) {
   this.getOrganizationProjects        = (org_id ) => this.requestAPI('get_organization_projects',     {org_id });
   this.getOrganizationParticipants    = (org_id ) => this.requestAPI('get_organization_participants', {org_id });
 
+  this.createProjectWorkspace = (proj_id, name) => this.requestAPI('new_project_workspace', {proj_id, name});
+  this.deleteProjectWorkspace = (ws_id        ) => this.requestAPI('rem_project_workspace', {ws_id        });
+
   /** @deprecated */
   this.getProject = (project_id) => this.requestAPI('get_project');
 
   /** @todo */
-  this.createProjectWorkspace         = (project_id, name) => this.requestAPI('new_project_workspace', {project_id, name});
 }

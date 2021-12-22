@@ -134,7 +134,7 @@ export default function Header() {
           <MenuIcon />
         </IconButton> */}
         <Typography className={classes.title} variant="h6" noWrap>
-          ВДеле проект
+          ВДеле | Проект
         </Typography>
         <div className={classes.empty_space} />
         <div>

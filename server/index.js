@@ -164,6 +164,21 @@ async function createUserProject(user_id, name, privacy_id) {
   );
 }
 
+
+async function createProjectWorkspace(proj_id, name) {
+  const [rows, fields] = await poolPromise.execute(
+    `INSERT INTO workspace (name, project_id) VALUES (?, ?)`,
+    [name, proj_id]
+  );
+}
+
+async function deleteProjectWorkspace(ws_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `CALL DeleteProjectWorkspace(?)`,
+    [ws_id]
+  );
+}
+
 async function createProject(user_id, name, privacy_id) {
   const [rows, fields] = await poolPromise.execute(
     'CALL CreateProject(?, ?, ?, ?);'
@@ -601,14 +616,22 @@ app.all('/project/:project_id/', async (req, res) => {
     return res.send(JSON.stringify({result: true}));
   });
   
-  // apiRoute.post('/new_user_project', async (req, res) => {
-  //   const body = req.body;
-  //   if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
-  //   if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+  apiRoute.post('/new_project_workspace', async (req, res) => {
+    const body = req.body;
+    if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
+    if (!body.proj_id || !expressions.int_expr.test(body.proj_id)) return res.sendStatus(400);
+
+    await createProjectWorkspace(body.proj_id, body.name);
+    return res.send(JSON.stringify({result: true}));
+  });
   
-  //   await createUserProject(req.user_info.id, body.name, privacy_values.indexOf(body.privacy));
-  //   return res.send(JSON.stringify({result: true}));
-  // });
+  apiRoute.post('/rem_project_workspace', async (req, res) => {
+    const body = req.body;
+    if (!body.ws_id || !expressions.int_expr.test(body.ws_id)) return res.sendStatus(400);
+
+    await deleteProjectWorkspace(body.ws_id);
+    return res.send(JSON.stringify({result: true}));
+  });
 
   apiRoute.post('/new_user_project', async (req, res) => {
     const body = req.body;

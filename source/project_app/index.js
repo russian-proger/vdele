@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import blue from '@material-ui/core/colors/blue';
-import grey     from '@material-ui/core/colors/grey';
+import red     from '@material-ui/core/colors/red';
 
 import {
   createTheme,
@@ -22,9 +22,9 @@ const theme = createTheme({
       dark: blue[900]
     },
     secondary: {
-      main: grey[50],
-      light: grey[100],
-      dark: grey[200]
+      main: red[800],
+      light: red[50],
+      dark: red[900]
     }
   },
 });
