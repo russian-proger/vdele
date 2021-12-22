@@ -172,6 +172,14 @@ async function createProjectWorkspace(proj_id, name) {
   );
 }
 
+
+async function createTask(ws_id, name, descr) {
+  const [rows, fields] = await poolPromise.execute(
+    `INSERT INTO task (workspace_id, name, description, created_dt, state_id) VALUES (?, ?, ?, CURRENT_TIMESTAMP, 0)`,
+    [ws_id, name, descr]
+  );
+}
+
 async function deleteProjectWorkspace(ws_id) {
   const [rows, fields] = await poolPromise.execute(
     `CALL DeleteProjectWorkspace(?)`,
@@ -265,6 +273,14 @@ async function getOrganizationParticipants(org_id) {
   return rows;
 }
 
+async function getProjectParticipants(proj_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM project_member AS pm LEFT JOIN user ON pm.user_id=user.id WHERE pm.project_id=?`,
+    [proj_id]
+  );
+  return rows;
+}
+
 async function getProjectWorkspaces(proj_id) {
   return (await poolPromise.execute(`SELECT * FROM workspace WHERE project_id=?`, [proj_id]))[0];
 }
@@ -273,6 +289,17 @@ async function getProjectTasks(proj_id) {
   return (await poolPromise.execute(`SELECT * FROM workspace_task WHERE project_id=?`, [proj_id]))[0];
 }
 
+async function addUserToProject(user_id, proj_id) {
+  await poolPromise.execute('INSERT INTO project_member (user_id, project_id, right_id) VALUES (?, ?, 2)', [user_id, proj_id]);
+}
+
+async function getProjectMember(user_id, proj_id) {
+  return (await poolPromise.execute('SELECT * FROM project_member WHERE user_id=? AND project_id=?', [user_id, proj_id]))[0];
+}
+
+async function deleteUserFromProject(user_id, proj_id) {
+  return (await poolPromise.execute('DELETE FROM project_member WHERE user_id=? AND project_id=?', [user_id, proj_id]))[0];
+}
 
 function isValidMail(mail) {
   if (mail.length > 64) return false;
@@ -579,6 +606,12 @@ app.all('/project/:project_id/', async (req, res) => {
     const participants = await getOrganizationParticipants(req.body.org_id);
     return res.send(JSON.stringify({result: true, data: participants}));
   });
+  
+  apiRoute.post('/get_project_participants', async (req, res) => {
+    if (!req.body.proj_id || !expressions.int_expr.test(req.body.proj_id)) return res.sendStatus(400);
+    const participants = await getProjectParticipants(req.body.proj_id);
+    return res.send(JSON.stringify({result: true, data: participants}));
+  });
 
   apiRoute.post('/get_project_workspaces', async (req, res) => {
     const body = req.body;
@@ -624,6 +657,16 @@ app.all('/project/:project_id/', async (req, res) => {
     await createProjectWorkspace(body.proj_id, body.name);
     return res.send(JSON.stringify({result: true}));
   });
+
+  apiRoute.post('/new_task', async (req, res) => {
+    const body = req.body;
+    if (!body.ws_id || !expressions.int_expr.test(body.ws_id)) return res.sendStatus(400);
+    if (!body.name || !expressions.taskname_expr.test(body.name)) return res.sendStatus(400);
+    if (!body.descr || !expressions.taskdescr_expr.test(body.descr)) return res.sendStatus(400);
+
+    await createTask(body.ws_id, body.name, body.descr);
+    return res.send(JSON.stringify({result: true}));
+  });
   
   apiRoute.post('/rem_project_workspace', async (req, res) => {
     const body = req.body;
@@ -641,7 +684,30 @@ app.all('/project/:project_id/', async (req, res) => {
     await createUserProject(req.user_info.id, body.name, privacy_values.indexOf(body.privacy));
     return res.send(JSON.stringify({result: true}));
   });
-  
+
+  apiRoute.post('/add_participant_to_project', async (req, res) => {
+    const body = req.body;
+    if (!body.nick || !expressions.nick_expr.test(body.nick)) return res.sendStatus(400);
+    if (!body.proj_id || !expressions.int_expr.test(body.proj_id)) return res.sendStatus(400);
+
+    const user = await getUserByNick(body.nick);
+    if (!user) return res.send(JSON.stringify({result: false, reasonCode: 0}));
+
+    const member = await getProjectMember(user.id, body.proj_id);
+    if (member.length != 0) return res.send(JSON.stringify({result: false, reasonCode: 1}));
+    await addUserToProject(user.id, body.proj_id);
+    return res.send(JSON.stringify({result: true}));
+  });
+
+  apiRoute.post('/rem_participant_from_project', async (req, res) => {
+    const body = req.body;
+    if (!body.user_id || !expressions.int_expr.test(body.user_id)) return res.sendStatus(400);
+    if (!body.proj_id || !expressions.int_expr.test(body.proj_id)) return res.sendStatus(400);
+    const member = getProjectMember(body.user_id, body.proj_id);
+    if (member.length == 0) return res.send(JSON.stringify({result: false, reasonCode: 0}));
+    await deleteUserFromProject(body.user_id, body.proj_id);
+    return res.send(JSON.stringify({result: true}));
+  });
   
   app.use('/api', apiRoute);
 }

@@ -39,17 +39,23 @@ export default function Network(self) {
   this.getUser                        = (user_id) => this.requestAPI('get_user',                      {user_id});
   this.getUserOrganizations           = (user_id) => this.requestAPI('get_user_organizations',        {user_id});
   this.getUserProjects                = (user_id) => this.requestAPI('get_user_projects',             {user_id});
-  this.getProjectWorkspaces           = (proj_id) => this.requestAPI('get_project_workspaces',        {proj_id});
-  this.getProjectTasks                = (proj_id) => this.requestAPI('get_project_tasks',             {proj_id});
   this.getOrganization                = (org_id ) => this.requestAPI('get_organization',              {org_id });
   this.getOrganizationProjects        = (org_id ) => this.requestAPI('get_organization_projects',     {org_id });
   this.getOrganizationParticipants    = (org_id ) => this.requestAPI('get_organization_participants', {org_id });
+  this.getProjectWorkspaces           = (proj_id) => this.requestAPI('get_project_workspaces',        {proj_id});
+  this.getProjectTasks                = (proj_id) => this.requestAPI('get_project_tasks',             {proj_id});
+  this.getProjectParticipants         = (proj_id) => this.requestAPI('get_project_participants',      {proj_id});
 
   this.createProjectWorkspace = (proj_id, name) => this.requestAPI('new_project_workspace', {proj_id, name});
   this.deleteProjectWorkspace = (ws_id        ) => this.requestAPI('rem_project_workspace', {ws_id        });
 
+  this.addParticipantToProject = (nick, proj_id) => this.requestAPI('add_participant_to_project', {nick, proj_id});
+  this.deleteParticipantFromProject = (user_id, proj_id) => this.requestAPI('rem_participant_from_project', {user_id, proj_id});
+
+  
+
+  this.createTask = (ws_id, name, descr) => this.requestAPI('new_task', {ws_id, name, descr});
+
   /** @deprecated */
   this.getProject = (project_id) => this.requestAPI('get_project');
-
-  /** @todo */
 }

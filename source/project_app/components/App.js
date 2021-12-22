@@ -10,6 +10,7 @@ import Header from './Header';
 // Routes
 
 import {
+  Avatar,
   Box,
   Button,
   CircularProgress,
@@ -19,11 +20,15 @@ import {
   IconButton,
   List,
   ListItem,
+  ListItemAvatar,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
+  Modal,
   Paper,
+  TextField,
+  Toolbar,
   Typography
 } from '@material-ui/core';
 
@@ -33,6 +38,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import GroupIcon from '@material-ui/icons/Group';
 import CreateIcon from '@material-ui/icons/Create';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import WifiTetheringIcon from '@material-ui/icons/WifiTethering';
 
 import Core from '../core/Core';
 import * as expressions from '../../../server/expressions';
@@ -44,9 +50,9 @@ const useStyles = makeStyles((theme) => ({
   },
   leftPanel: {
     background: 'white',
-    position: 'absolute',
+    position: 'fixed',
     left: 0,
-    top: 0,
+    top: 45,
     borderRight: '1px solid grey',
     width: 300,
     height: '100%'
@@ -77,25 +83,99 @@ const useStyles = makeStyles((theme) => ({
     textTransform: 'none'
   },
   tasksContainer: {
-    height: 'calc(100% - 20px)'
+    height: '100%'
   },
   tasksGrid: {
-    height: '100%'
   },
   tasksList: {
     marginTop: 10,
-    height: '100%'
+    background: "#eee",
+    paddingBottom: 1
   },
   wsItem: {
     minHeight: 38
   }
 }));
 
+function Participants(props) {
+  const [state, setState] = React.useState({
+    users: [],
+    loading: true,
+    user_nick: ''
+  })
+
+  React.useEffect(() => {
+    Core.Network.getProjectParticipants(window.project_info.id).then(res => {
+      setState({...state, users: res.data, loading: false});
+    })
+  }, []);
+
+  function addUser() {
+    Core.Network.addParticipantToProject(state.user_nick, window.project_info.id).then(res => {
+      if (res.result) {
+        alert("Пользователь успешно добавлен в проект");
+      } else if (res.reason == 0) alert("Пользователя с таким ником не существует");
+      else if (res.reason == 1) alert("Пользователь уже является участником проекта");
+      else alert("Неизвестная ошибка");
+      setState({...state, user_nick: ''});
+      console.log(res);
+    });
+  }
+
+  function deleteUser(user_id, nick) {
+    if (!confirm(`Вы уверены, что хотите удалить пользователя с ником "${nick}"?`)) return;
+    Core.Network.deleteParticipantFromProject(user_id, window.project_info.id).then(res => {
+      if (res.result) alert("Пользователь удалён с проекта");
+      else if (res.reason == 0) alert("Пользователь уже удалён с проекта");
+      else alert("Неизвестная ошибка");
+    });
+  }
+
+  if (state.loading) return <CircularProgress />
+
+  return (
+<>
+  <Typography style={{marginLeft: 25}}>Добавить пользователя</Typography>
+  <Toolbar>
+    <TextField onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
+    <Button onClick={() => addUser()}>Добавить</Button>
+  </Toolbar>
+  <List
+    subheader={
+      <ListSubheader component="div" id="nested-list-subheader">
+        Участники
+      </ListSubheader>
+    }>
+    { state.users.map((user, x) => (
+      <ListItem key={x}>
+        <ListItemAvatar>
+          <Avatar src={`/profile_photos/${user.photo_name}`} />
+        </ListItemAvatar>
+        <ListItemText>{user.first_name} {user.second_name}</ListItemText>
+        <ListItemSecondaryAction>
+          <IconButton onClick={() => deleteUser(user.id, user.nick)} disabled={user.id == window.user_info.id}>
+            <DeleteIcon />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+    ))
+    }
+  </List>
+</>
+  )
+}
+
 export default function App(_props) {
   const classes = useStyles();
 
   const [state, setState] = React.useState({
-    currentWorkspace: -1
+    currentWorkspace: -1,
+    newTaskName: '',
+    newTaskDescription: ''
+  });
+
+  const [modal, setModal] = React.useState({
+    name: ''
   });
 
   const [projectInfo, setProjectInfo] = React.useState({
@@ -120,7 +200,7 @@ export default function App(_props) {
             ...projectInfo,
             workspaces, tasks
           });
-        }, 1000);
+        }, 100);
       })
   }, []);
   
@@ -149,14 +229,19 @@ export default function App(_props) {
     setState({...state, currentWorkspace});
   }
 
+  function createTask() {
+    Core.Network.createTask(state.currentWorkspace, state.newTaskName, state.newTaskDescription);
+    setModal({name: ''});
+    setState({...state, newTaskName: '', newTaskDescription: ''});
+  }
+
   const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.workspace_id == state.currentWorkspace);
-  console.log(tasks);
 
   return (
     <>
       <Header />
       <Grid className={classes.rootGrid} container>
-        <Grid item style={{width: 250}}>
+        <Grid item style={{width: 300}}>
           <div className={classes.leftPanel}>
             <div className={classes.relWrapper}>
               <Box m={1}>
@@ -176,7 +261,7 @@ export default function App(_props) {
                   </ListItemIcon>
                   <ListItemText primary="Изменить имя" />
                 </ListItem>
-                <ListItem button onClick={changeName}>
+                <ListItem button onClick={() => setModal({name: 'participants'})}>
                   <ListItemIcon>
                     <GroupIcon color="primary" />
                   </ListItemIcon>
@@ -190,7 +275,7 @@ export default function App(_props) {
                 </ListItem>
               </List>
               <Divider/>
-              <List
+              <List dense
                 subheader={
                   <ListSubheader component="div" id="nested-list-subheader">
                     Рабочие пространства
@@ -208,7 +293,7 @@ export default function App(_props) {
                 <Divider/><br/>
                 <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(-1)} selected={state.currentWorkspace == -1}>
                   <ListItemIcon>
-                    <GroupWorkIcon />
+                    <WifiTetheringIcon />
                   </ListItemIcon>
                   <ListItemText>Общее пространство</ListItemText>
                 </ListItem>
@@ -249,31 +334,24 @@ export default function App(_props) {
             { ["В очереди", "На проверке", "Выполнено"].map((title, state_id) => (
               <Grid key={state_id} item sm={4}>
                 <Paper className={classes.tasksList}>
-                  <Typography variant="h6" style={{fontSize: '14px'}}>{title}</Typography>
-                  <div className="task-root">
-                    
-                  </div>
+                  <Typography variant="h6" style={{padding: 5, paddingLeft: 20, fontSize: '16px'}}>{title}</Typography>
+                  { tasks.filter(task => task.state_id == state_id).map((task, x) => (
+                    <div key={x} className="task">{task.name}</div>
+                  )) }
+                  {!state_id && state.currentWorkspace != -1 &&
+                  <>
+                  <Divider />
+                  <Button onClick={() => setModal({name: "task_creating", })} size="small" style={{width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0}}><AddIcon style={{marginRight: 5, fontSize: '22px'}} /> Добавить задание</Button>
+                  </>
+                  }
                 </Paper>
               </Grid>
-            ))
-
-            }
-              
-              {/* <Grid item sm={4}>
-                <Paper className={classes.tasksList}>
-                  <Typography variant="h6" align="center">На проверке</Typography>
-                </Paper>
-              </Grid>
-              <Grid item sm={4}>
-                <Paper className={classes.tasksList}>
-                  <Typography variant="h6" align="center">Выполнено</Typography>
-                </Paper>
-              </Grid> */}
+            ))}
             </Grid>
           }
           </Container>
         </Grid>
-        <Grid item style={{width: 250}}>
+        {/* <Grid item style={{width: 250}}>
           <div className={classes.rightPanel}>
             <div className={classes.relWrapper}>
               <Box m={1}>
@@ -283,8 +361,31 @@ export default function App(_props) {
               </Box>
             </div>
           </div>
-        </Grid>
+        </Grid> */}
       </Grid>
+      <Modal open={modal.name == "participants"} onClose={() => setModal({name: ''})}>
+        <div className="modal_window_wrapper">
+          <div className="modal_window">
+            <Typography align="center" variant="h5">Участники</Typography>
+            <Divider/><br/>
+            <Participants />
+          </div>
+        </div>
+      </Modal>
+      <Modal open={modal.name == "task_creating"} onClose={() => setModal({name: ''})}>
+        <div className="modal_window_wrapper">
+          <div className="modal_window">
+            <Typography align="center" variant="h5">Новая задача</Typography>
+            <Divider/><br/>
+            <Box m={1}>
+              <TextField onChange={(ev) => setState({...state, newTaskName: ev.currentTarget.value})} value={state.newTaskName} style={{width: '100%'}} label="Название задания" variant="outlined" /><br/><br/>
+              <TextField onChange={(ev) => setState({...state, newTaskDescription: ev.currentTarget.value})} value={state.newTaskDescription} style={{width: '100%'}} multiline label="Описание" variant="outlined" />
+            </Box>
+
+            <Button onClick={() => createTask()} color="primary" variant="contained">Создать</Button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 }

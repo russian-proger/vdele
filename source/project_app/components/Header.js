@@ -128,7 +128,7 @@ export default function Header() {
   }
 
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Toolbar className={classes.toolbar}>
         {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
           <MenuIcon />
