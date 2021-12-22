@@ -9,6 +9,7 @@ import {
   Container,
   Divider,
   Grid,
+  LinearProgress,
   Paper,
   Tab,
   Tabs,
@@ -104,7 +105,7 @@ export default function Main() {
 
   if (state.userInfo == null) {
     return (
-      <CircularProgress />
+      <LinearProgress />
     )
   }
 

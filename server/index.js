@@ -180,12 +180,28 @@ async function getUserBySignToken(user_id, token) {
   return rows[0];
 }
 
-async function getOrganizations(user_id, onlyPublic=true) {
+async function getUserOrganizations(user_id, onlyPublic=true) {
   const [rows, fields] = await poolPromise.execute(
     `SELECT * FROM user_organizations WHERE user_id=? ${onlyPublic ? 'AND public=1' : ''}`,
     [user_id]
   );
   return rows;
+}
+
+async function getOrganization(org_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM organization WHERE id=?`,
+    [org_id]
+  );
+  return rows[0];
+}
+
+async function getUserOrgRights(user_id, org_id) {
+  const [rows, fields] = await poolPromise.execute(
+    `SELECT * FROM organization_member WHERE user_id=? AND org_id=?`,
+    [user_id, org_id]
+  );
+  return rows[0];
 }
 
 async function getUserProjects(user_id, onlyPublic=true) {
@@ -379,6 +395,7 @@ const networkAppHandle = (req, res) => {
 app.use('/profile/:user_id', networkAppHandle);
 app.use('/new_organization', networkAppHandle);
 app.use('/new_project', networkAppHandle);
+app.use('/organization/:org_id', networkAppHandle);
 
 app.all('/quit', async (req, res) => {
   if (req.is_auth) await deleteSignToken(req.user_info.id, req.user_info.token);
@@ -424,9 +441,33 @@ apiRoute.post('/get_user_projects', async (req, res) => {
 
 apiRoute.post('/get_user_organizations', async (req, res) => {
   if (!req.body.user_id || !expressions.int_expr.test(req.body.user_id)) return res.sendStatus(400);
-  const rows = await getOrganizations(req.user_info.id, req.user_info.id != req.body.user_id);
+  const rows = await getUserOrganizations(req.user_info.id, req.user_info.id != req.body.user_id);
   return res.send(JSON.stringify({result: true, data: rows}));
 });
+
+apiRoute.post('/get_organization', async (req, res) => {
+  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+  const organization = await getOrganization(req.body.org_id);
+  if (!organization) return res.send(JSON.stringify({result: true, data: undefined}));
+  
+  const member = await getUserOrgRights(req.user_info.id, req.body.org_id);
+  if (organization.public) {
+    return res.send(JSON.stringify({result: true, data: organization, rights: member}));
+  }
+
+  if (member != undefined) {
+    return res.send(JSON.stringify({result: true, data: organization, rights: member}));
+  } else {
+    return res.send(JSON.stringify({result: true, data: null, rights: member}));
+  }
+});
+apiRoute.post('/get_organization_projects', async (req, res) => {
+  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+});
+apiRoute.post('/get_organization_participants', async (req, res) => {
+  if (!req.body.org_id || !expressions.int_expr.test(req.body.org_id)) return res.sendStatus(400);
+});
+
 
 const privacy_values = ['public', 'private'];
 apiRoute.post('/new_organization', async (req, res) => {

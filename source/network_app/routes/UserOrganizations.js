@@ -74,7 +74,7 @@ export default function UserOrganizations(props) {
   });
   
   React.useState(() => {
-    Core.Network.getOrganizations(window.user_info.id).then(res => {
+    Core.Network.getUserOrganizations(window.user_info.id).then(res => {
       setState({...state, _orgs: res.data, orgs: res.data});
     });
   }, []);
@@ -88,6 +88,10 @@ export default function UserOrganizations(props) {
     }
 
     setState({...state, search_text, orgs});
+  }
+
+  function openOrganization(org_id) {
+    navigate(`/organization/${org_id}`);
   }
 
   const pad = (s) => (s < 10) ? '0' + s : s;
@@ -106,7 +110,7 @@ export default function UserOrganizations(props) {
         <div key={id}>
           <Divider/><br/>
             <Toolbar>
-              <Button className={classes.org_button} key={id}>
+              <Button onClick={() => openOrganization(org.id)} className={classes.org_button} key={id}>
                 <div>
                   <Avatar className={classes.avatar} src={`/organization_photos/${org.logo_name}`} />
                 </div>

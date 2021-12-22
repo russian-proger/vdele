@@ -12,6 +12,7 @@ import Header from './Header';
 import Main from '../routes/Main';
 import UserProfile from '../routes/UserProfile';
 import NewOrganization from '../routes/NewOrganization';
+import Organization from '../routes/Organization';
 import NewProject from '../routes/NewProject';
 
 const useStyles = makeStyles((theme) => ({
@@ -20,18 +21,6 @@ const useStyles = makeStyles((theme) => ({
 export default function App(_props) {
   const classes = useStyles();
 
-  const [state, setState] = React.useState({
-    menuAvatar: null
-  });
-
-  function onClickAvatar(event) {
-    setState({...state, menuAvatar: event.currentTarget});
-  }
-
-  function onCloseAvatar() {
-    setState({...state, menuAvatar: null});
-  }
-  
   return (
     <BrowserRouter>
       <Header />
@@ -39,6 +28,8 @@ export default function App(_props) {
         <Route path="/" element={<Main />}></Route>
         <Route path="/profile/:user_id" element={<UserProfile />}></Route>
         <Route path="/profile/:user_id/:page" element={<UserProfile />}></Route>
+        <Route path="/organization/:org_id" element={<Organization />}></Route>
+        <Route path="/organization/:org_id/:page" element={<Organization />}></Route>
         <Route path="/new_organization" element={<NewOrganization />}></Route>
         <Route path="/new_project" element={<NewProject />}></Route>
       </Routes>
