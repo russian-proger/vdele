@@ -94,7 +94,7 @@ export default function OrganizationProjects(props) {
 
 
   const pad = (s) => (s < 10) ? '0' + s : s;
-
+  console.log(props);
   return (
   <>
     <Toolbar>
