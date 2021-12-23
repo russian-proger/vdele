@@ -36,6 +36,7 @@ export default function Network(self) {
   this.createOrganizationProject = (org_id, name, privacy) => this.requestAPI('new_organization_project', { org_id, name, privacy });
   this.createUserProject = (name, privacy) => this.requestAPI('new_user_project', { name, privacy });
   
+  this.getTask = (task_id) => this.requestAPI('get_task', {task_id});
   this.getUser                        = (user_id) => this.requestAPI('get_user',                      {user_id});
   this.getUserOrganizations           = (user_id) => this.requestAPI('get_user_organizations',        {user_id});
   this.getUserProjects                = (user_id) => this.requestAPI('get_user_projects',             {user_id});
@@ -52,9 +53,7 @@ export default function Network(self) {
   this.addParticipantToProject = (nick, proj_id) => this.requestAPI('add_participant_to_project', {nick, proj_id});
   this.deleteParticipantFromProject = (user_id, proj_id) => this.requestAPI('rem_participant_from_project', {user_id, proj_id});
 
-  this.getTask = (task_id) => this.requestAPI('get_task', {task_id});
-
-  
+  this.changeProjectName = (proj_id, name) => this.requestAPI('change_project_name', {proj_id, name});
 
   this.createTask = (ws_id, name, descr) => this.requestAPI('new_task', {ws_id, name, descr});
 

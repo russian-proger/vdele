@@ -102,7 +102,7 @@ function Participants(props) {
     users: [],
     loading: true,
     user_nick: ''
-  })
+  });
 
   React.useEffect(() => {
     Core.Network.getProjectParticipants(window.project_info.id).then(res => {
@@ -136,10 +136,12 @@ function Participants(props) {
   return (
 <>
   <Typography style={{marginLeft: 25}}>Добавить пользователя</Typography>
-  <Toolbar>
-    <TextField onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
-    <Button onClick={() => addUser()}>Добавить</Button>
-  </Toolbar>
+  { window.user_info.rights.right_id <= 1 &&
+    <Toolbar>
+      <TextField onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
+      <Button onClick={() => addUser()}>Добавить</Button>
+    </Toolbar>
+  }
   <List
     subheader={
       <ListSubheader component="div" id="nested-list-subheader">
@@ -154,11 +156,13 @@ function Participants(props) {
           </IconButton>
         </ListItemAvatar>
         <ListItemText>{user.first_name} {user.second_name}</ListItemText>
+      { window.user_info.rights.right_id <= 1 &&
         <ListItemSecondaryAction>
           <IconButton onClick={() => deleteUser(user.id, user.nick)} disabled={user.id == window.user_info.id}>
             <DeleteIcon />
           </IconButton>
         </ListItemSecondaryAction>
+      }
       </ListItem>
     ))
     }
@@ -231,14 +235,19 @@ export default function App(_props) {
   
 
   function changeName() {
-    prompt('Введите имя пространства');
+    let name = '';
+    while (!expressions.orgname_expr.test(name)) {
+      name = prompt('Введите новое имя проекта');
+    }
+    if (name) {
+      Core.Network.changeProjectName(window.project_info.id, name);
+    }
   }
 
   function createWorkspace() {
     let name = '';
     while (!expressions.orgname_expr.test(name)) {
       name = prompt('Введите имя пространства');
-      console.log(name);
     }
 
     if (name !== null) Core.Network.createProjectWorkspace(window.project_info.id, name);
@@ -265,7 +274,7 @@ export default function App(_props) {
   }
 
   const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.workspace_id == state.currentWorkspace);
-
+  console.log(window.user_info.rights.right_id);
   return (
     <>
       <Header />
@@ -284,24 +293,28 @@ export default function App(_props) {
                   </ListSubheader>
                 }
               >
+              { window.user_info.rights.right_id <= 1 &&
                 <ListItem button onClick={changeName}>
                   <ListItemIcon>
                     <CreateIcon color="primary" />
                   </ListItemIcon>
                   <ListItemText primary="Изменить имя" />
                 </ListItem>
+              }
                 <ListItem button onClick={() => setModal({name: 'participants'})}>
                   <ListItemIcon>
                     <GroupIcon color="primary" />
                   </ListItemIcon>
                   <ListItemText primary="Участники" />
                 </ListItem>
-                <ListItem button onClick={changeName}>
+              { window.user_info.rights.right_id == 0 &&
+                <ListItem button onClick={() => alert("Пока не работает")}>
                   <ListItemIcon>
                     <DeleteIcon color="secondary" />
                   </ListItemIcon>
                   <ListItemText primary="Удалить проект" />
                 </ListItem>
+              }
               </List>
               <Divider/>
               <List dense
@@ -313,12 +326,14 @@ export default function App(_props) {
               >
               { projectInfo.workspaces !== null &&
               <>
+              {window.user_info.rights.right_id <= 1 &&
                 <ListItem button onClick={createWorkspace}>
                   <ListItemIcon>
                     <AddBoxIcon color="primary" />
                   </ListItemIcon>
                   <ListItemText>Добавить</ListItemText>
                 </ListItem>
+              }
                 <Divider/><br/>
                 <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(-1)} selected={state.currentWorkspace == -1}>
                   <ListItemIcon>
@@ -367,7 +382,7 @@ export default function App(_props) {
                   { tasks.filter(task => task.state_id == state_id).map((task, x) => (
                     <div onClick={() => openTask(task.id)} key={x} className="task">{task.name}</div>
                   )) }
-                  {!state_id && state.currentWorkspace != -1 &&
+                  {!state_id && state.currentWorkspace != -1 && window.user_info.rights.right_id <= 1 &&
                   <>
                   <Divider />
                   <Button onClick={() => setModal({name: "task_creating", })} size="small" style={{width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0}}><AddIcon style={{marginRight: 5, fontSize: '22px'}} /> Добавить задание</Button>

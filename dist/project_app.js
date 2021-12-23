@@ -17835,7 +17835,7 @@ function Participants(props) {
     style: {
       marginLeft: 25
     }
-  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_7__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_8__.default, {
+  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C \u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u044F"), window.user_info.rights.right_id <= 1 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_7__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_8__.default, {
     onChange: function onChange(ev) {
       return setState(_objectSpread(_objectSpread({}, state), {}, {
         user_nick: ev.currentTarget.value
@@ -17862,7 +17862,7 @@ function Participants(props) {
       }
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_15__.default, {
       src: "/profile_photos/".concat(user.photo_name)
-    }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_16__.default, null, user.first_name, " ", user.second_name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_17__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_14__.default, {
+    }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_16__.default, null, user.first_name, " ", user.second_name), window.user_info.rights.right_id <= 1 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_17__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_14__.default, {
       onClick: function onClick() {
         return deleteUser(user.id, user.nick);
       },
@@ -17944,7 +17944,15 @@ function App(_props) {
   }, []);
 
   function changeName() {
-    prompt('Введите имя пространства');
+    var name = '';
+
+    while (!_server_expressions__WEBPACK_IMPORTED_MODULE_3__.orgname_expr.test(name)) {
+      name = prompt('Введите новое имя проекта');
+    }
+
+    if (name) {
+      _core_Core__WEBPACK_IMPORTED_MODULE_2__.default.Network.changeProjectName(window.project_info.id, name);
+    }
   }
 
   function createWorkspace() {
@@ -17952,7 +17960,6 @@ function App(_props) {
 
     while (!_server_expressions__WEBPACK_IMPORTED_MODULE_3__.orgname_expr.test(name)) {
       name = prompt('Введите имя пространства');
-      console.log(name);
     }
 
     if (name !== null) _core_Core__WEBPACK_IMPORTED_MODULE_2__.default.Network.createProjectWorkspace(window.project_info.id, name);
@@ -17991,6 +17998,7 @@ function App(_props) {
   var tasks = projectInfo.tasks && projectInfo.tasks.filter(function (task) {
     return state.currentWorkspace == -1 || task.workspace_id == state.currentWorkspace;
   });
+  console.log(window.user_info.rights.right_id);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_Header__WEBPACK_IMPORTED_MODULE_1__.default, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_20__.default, {
     className: classes.rootGrid,
     container: true
@@ -18013,7 +18021,7 @@ function App(_props) {
       component: "div",
       id: "nested-list-subheader"
     }, "\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044F")
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_12__.default, {
+  }, window.user_info.rights.right_id <= 1 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_12__.default, {
     button: true,
     onClick: changeName
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_22__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_icons_Create__WEBPACK_IMPORTED_MODULE_23__.default, {
@@ -18031,9 +18039,11 @@ function App(_props) {
     color: "primary"
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_16__.default, {
     primary: "\u0423\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u0438"
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_12__.default, {
+  })), window.user_info.rights.right_id == 0 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_12__.default, {
     button: true,
-    onClick: changeName
+    onClick: function onClick() {
+      return alert("Пока не работает");
+    }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_22__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_icons_Delete__WEBPACK_IMPORTED_MODULE_18__.default, {
     color: "secondary"
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_16__.default, {
@@ -18044,7 +18054,7 @@ function App(_props) {
       component: "div",
       id: "nested-list-subheader"
     }, "\u0420\u0430\u0431\u043E\u0447\u0438\u0435 \u043F\u0440\u043E\u0441\u0442\u0440\u0430\u043D\u0441\u0442\u0432\u0430")
-  }, projectInfo.workspaces !== null && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_12__.default, {
+  }, projectInfo.workspaces !== null && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, window.user_info.rights.right_id <= 1 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_12__.default, {
     button: true,
     onClick: createWorkspace
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_22__.default, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_icons_AddBox__WEBPACK_IMPORTED_MODULE_25__.default, {
@@ -18118,7 +18128,7 @@ function App(_props) {
         key: x,
         className: "task"
       }, task.name);
-    }), !state_id && state.currentWorkspace != -1 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_21__.default, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_9__.default, {
+    }), !state_id && state.currentWorkspace != -1 && window.user_info.rights.right_id <= 1 && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_21__.default, null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_9__.default, {
       onClick: function onClick() {
         return setModal({
           name: "task_creating"
@@ -18697,6 +18707,12 @@ function Network(self) {
     });
   };
 
+  this.getTask = function (task_id) {
+    return _this.requestAPI('get_task', {
+      task_id: task_id
+    });
+  };
+
   this.getUser = function (user_id) {
     return _this.requestAPI('get_user', {
       user_id: user_id
@@ -18778,9 +18794,10 @@ function Network(self) {
     });
   };
 
-  this.getTask = function (task_id) {
-    return _this.requestAPI('get_task', {
-      task_id: task_id
+  this.changeProjectName = function (proj_id, name) {
+    return _this.requestAPI('change_project_name', {
+      proj_id: proj_id,
+      name: name
     });
   };
 

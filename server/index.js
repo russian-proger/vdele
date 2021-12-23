@@ -254,6 +254,7 @@ async function getUserProjectRights(user_id, project_id) {
     `SELECT * FROM project_member WHERE user_id=? AND project_id=?`,
     [user_id, project_id]
   );
+
   return rows[0];
 }
 
@@ -307,6 +308,10 @@ async function getProjectMember(user_id, proj_id) {
 
 async function deleteUserFromProject(user_id, proj_id) {
   return (await poolPromise.execute('DELETE FROM project_member WHERE user_id=? AND project_id=?', [user_id, proj_id]))[0];
+}
+
+async function changeProjectName(proj_id, name) {
+  await poolPromise.execute('UPDATE project SET name=? WHERE id=?', [name, proj_id]);
 }
 
 function isValidMail(mail) {
@@ -518,19 +523,21 @@ app.all('/project/:project_id/', async (req, res) => {
   if (!expressions.int_expr.test(req.params.project_id)) return res.redirect('/');
   const project = await getProject(req.params.project_id)
   if (!project) res.redirect('/');
-  
+
+  if (project.org_id == null) {
+    // User project
+    const rights = await getUserProjectRights(req.user_info.id, req.params.project_id);
+    req.user_info.rights = rights;
+    
+  } else {
+    // Org project
+  }
+
   let vars = ({
     user: JSON.stringify({...req.user_info, token: undefined, password: undefined }),
     project: JSON.stringify({...project })
   });
 
-  if (project.org_id === null) {
-    // User project
-    const rights = await getUserProjectRights(req.user_info.id, req.params.project_id);
-    
-  } else {
-    // Org project
-  }
   res.render('projapp', vars);
 });
 
@@ -722,6 +729,15 @@ app.all('/project/:project_id/', async (req, res) => {
     const member = getProjectMember(body.user_id, body.proj_id);
     if (member.length == 0) return res.send(JSON.stringify({result: false, reasonCode: 0}));
     await deleteUserFromProject(body.user_id, body.proj_id);
+    return res.send(JSON.stringify({result: true}));
+  });
+
+  apiRoute.post('/change_project_name', async (req, res) => {
+    const body = req.body;
+    if (!body.proj_id || !expressions.int_expr.test(body.proj_id)) return res.sendStatus(400);
+    if (!body.name || !expressions.projname_expr.test(body.name)) return res.sendStatus(400);
+
+    await changeProjectName(body.proj_id, body.name);
     return res.send(JSON.stringify({result: true}));
   });
   
