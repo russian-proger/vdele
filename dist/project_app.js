@@ -17791,6 +17791,35 @@ var useStyles = (0,_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_4__.default
   };
 });
 
+var tableToExcel = function () {
+  var uri = 'data:application/vnd.ms-excel;base64,',
+      template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table>{table}</table></body></html>',
+      base64 = function base64(s) {
+    return window.btoa(unescape(encodeURIComponent(s)));
+  },
+      format = function format(s, c) {
+    return s.replace(/{(\w+)}/g, function (m, p) {
+      return c[p];
+    });
+  },
+      downloadURI = function downloadURI(uri, name) {
+    var link = document.createElement("a");
+    link.download = name;
+    link.href = uri;
+    link.click();
+  };
+
+  return function (table, name, fileName) {
+    if (!table.nodeType) table = document.getElementById(table);
+    var ctx = {
+      worksheet: name || 'Worksheet',
+      table: table.innerHTML
+    };
+    var resuri = uri + base64(format(template, ctx));
+    downloadURI(resuri, fileName);
+  };
+}();
+
 function Participants(props) {
   var _React$useState = react__WEBPACK_IMPORTED_MODULE_0__.useState({
     users: [],
@@ -17830,6 +17859,16 @@ function Participants(props) {
     });
   }
 
+  function exportUsers() {
+    console.log(state.users);
+    var table = document.createElement("table");
+    table.innerHTML = "\n      <thead>\n        <tr>\n          <td>\u041D\u0438\u043A\u043D\u0435\u0439\u043C</td>\n          <td>\u0418\u043C\u044F</td>\n          <td>\u0424\u0430\u043C\u0438\u043B\u0438\u044F</td>\n          <td>Email</td>\n        </tr>\n      </thead>\n      <tbody>\n        ".concat(state.users.map(function (user) {
+      return "\n          <tr>\n            <td>".concat(user.nick, "</td>\n            <td>").concat(user.first_name, "</td>\n            <td>").concat(user.last_name, "</td>\n            <td>").concat(user.mail, "</td>\n          </tr>");
+    }).join(''), "\n      </tbody>\n    ");
+    console.log(table);
+    tableToExcel(table, 'Список участников', "Список участников.xls");
+  }
+
   if (state.loading) return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_5__.default, null);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_6__.default, {
     style: {
@@ -17848,7 +17887,11 @@ function Participants(props) {
     onClick: function onClick() {
       return addUser();
     }
-  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__.default, {
+  }, "\u0414\u043E\u0431\u0430\u0432\u0438\u0442\u044C")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_9__.default, {
+    onClick: function onClick() {
+      return exportUsers();
+    }
+  }, "\u042D\u043A\u0441\u043F\u043E\u0440\u0442 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u043E\u0432"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_10__.default, {
     subheader: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_material_ui_core__WEBPACK_IMPORTED_MODULE_11__.default, {
       component: "div",
       id: "nested-list-subheader"
