@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-function parseINIString(data){
+function ParseINIString(data){
   var regex = {
       section: /^\s*\[\s*([^\]]*)\s*\]\s*$/,
       param: /^\s*([^=]+?)\s*=\s*(.*?)\s*$/,
@@ -14,10 +14,12 @@ function parseINIString(data){
           return;
       }else if(regex.param.test(line)){
           var match = line.match(regex.param);
+          let val = match[2];
+          if (val[0] == "\"") val = val.slice(1,-1);
           if(section){
-              value[section][match[1]] = match[2];
+              value[section][match[1]] = val;
           }else{
-              value[match[1]] = match[2];
+              value[match[1]] = val;
           }
       }else if(regex.section.test(line)){
           var match = line.match(regex.section);
@@ -30,15 +32,15 @@ function parseINIString(data){
   return value;
 }
 
-function parseINIFile(path) {
+function ParseINIFile(path) {
   if (fs.existsSync(path)) {
-    return parseINIString(fs.readFileSync(path).toString());
+    return ParseINIString(fs.readFileSync(path).toString());
   } else {
     throw Error(`ini file doesn't exists: ${path}`);
   }
 }
 
 module.exports = ({
-  parseINIFile,
-  parseINIString
+  ParseINIFile,
+  ParseINIString
 });

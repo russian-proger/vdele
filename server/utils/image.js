@@ -70,7 +70,7 @@ const bitmaps = [
 const width = 8;
 const height = 8;
 const pixel_width = 90;
-function generateRandomImage(path, reverse=1) {
+function GenerateRandomImage(path, reverse=1) {
   return new Promise((resolve) => {
     const fr_color = 0xffffffff;
     const bg_color = colors[parseInt(Math.random() *  colors.length)];
@@ -101,5 +101,5 @@ function generateRandomImage(path, reverse=1) {
 
 
 module.exports = ({
-  generateRandomImage
+  GenerateRandomImage
 });
