@@ -6,7 +6,6 @@ const utils = require('../utils');
  */
 module.exports = (core, router) => {
     router.post('/get_user', async (req, res) => {
-        console.log(req.body);
         // console.log(123);
         // if (utils.checker.IsInteger(req.body.user_id))
         //     return res.sendStatus(400);

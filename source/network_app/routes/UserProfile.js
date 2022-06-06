@@ -109,7 +109,7 @@ export default function Main() {
     )
   }
 
-  const createdDate = new Date(state.userInfo.created_dt)
+  const createdDate = new Date(state.userInfo.createdAt)
   const pad = (s) => (s < 10) ? '0' + s : s;
 
   return (
@@ -117,10 +117,10 @@ export default function Main() {
       <Grid container spacing={4}>
         <Grid item xs={3}>
           <Box>
-            <img className={classes.profile_image} src={`/profile_photos/${state.userInfo.photo_name}`} />
+            <img className={classes.profile_image} src={`/profile_photos/${state.userInfo.photoName}`} />
           </Box>
 
-          <Typography className={classes.name}><b>{state.userInfo.first_name} {state.userInfo.last_name}</b></Typography>
+          <Typography className={classes.name}><b>{state.userInfo.firstName} {state.userInfo.lastName}</b></Typography>
           <Typography className={classes.nickname}>{state.userInfo.nick}</Typography>
           <Typography className={classes.created_date}>Дата создания: {createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</Typography>
 

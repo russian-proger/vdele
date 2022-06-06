@@ -106,7 +106,7 @@ export default function UserProjects(props) {
       }
     </Toolbar>
     {state.projects.map((project, id) => {
-      const createdDate = new Date(project.created_dt)
+      const createdDate = new Date(project.createdAt)
       return (
         <div key={id}>
           <Divider/><br/>

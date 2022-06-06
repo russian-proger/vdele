@@ -6,20 +6,22 @@ const utils = require('../utils');
  */
 module.exports = (core, router) => {
     router.post('/get_user_projects', async (req, res) => {
-        console.log(req.body);
-        console.log(123);
-        if (utils.checker.IsInteger(req.body.user_id))
+
+        if (!utils.checker.IsInteger(req.body.user_id))
             return res.sendStatus(400);
-        const projects = await core.GetModel('User').findAll({
+
+        const projects = await core.GetModel('User').findOne({
+            attributes: ['id'],
             where: {
-                id: req.body.user_id
+                id: req.body.user_id,
             },
             include: [{
-                model: core.GetModel('Project')
+                model: core.GetModel('Project'),
             }]
         }, );
-        console.log(projects)
-        // const rows = await getUserProjects(req.user_info.id, req.user_info.id != req.body.user_id);
-        return res.send(JSON.stringify({result: true, data: projects}));
+
+        console.log(projects.dataValues.Projects.map(v => v.dataValues));
+        
+        return res.send(JSON.stringify({result: true, data: projects.dataValues.Projects.map(v => v.dataValues)}));
     });
 }

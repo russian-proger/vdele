@@ -41,7 +41,7 @@ import AddBoxIcon from '@material-ui/icons/AddBox';
 import WifiTetheringIcon from '@material-ui/icons/WifiTethering';
 
 import Core from '../core/Core';
-import * as expressions from '../../../server/expressions';
+import * as expressions from '../../../server/utils/expressions';
 
 const useStyles = makeStyles((theme) => ({
   rootGrid: {
