@@ -3,7 +3,7 @@ const http              = require('http');
 const Express           = require('express');
 
 const { ParseINIFile }        = require('./utils/ini-parser');
-const { Sequelize } = require('sequelize');
+const { Sequelize, Model } = require('sequelize');
 
 /**
  * Singletone class
@@ -23,10 +23,20 @@ function Core() {
         dialect: "mysql"
     });
 
+    /**
+     * @description ORM Models 
+     * @type {{[key: string]: import('sequelize').ModelCtor<Model<any,any>>}} */
+    let models = ({});
+
     /** Getters */
-    this.GetApp     = () => app;
-    this.GetServer  = () => server;
-    this.GetConfig  = () => config;
+    this.GetApp         = () => app;
+    this.GetServer      = () => server;
+    this.GetConfig      = () => config;
+    this.GetSequelize   = () => sequelize;
+    this.GetModel       = (key) => models[key];
+
+    /** Setters */
+    this.SetModel       = (key, val) => models[key] = val;
 
     /** Method making server to listen */
     this.Listen = () => server.listen(config.server.listen_port);
