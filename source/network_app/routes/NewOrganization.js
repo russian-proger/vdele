@@ -77,7 +77,7 @@ export default function Main() {
     setState({...state, creating: true});
     Core.Network.createOrganization(state.projectName, state.privacy).then(() => {
       setTimeout(() => {
-        navigate(`/profile/${window.user_info.user_id}/organizations`);
+        navigate(`/profile/${window.user_info.id}/organizations`);
       }, 500);
     });
   }

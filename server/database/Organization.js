@@ -9,6 +9,7 @@ function DefineOrganization(core) {
     return core.GetSequelize().define('Organization', {
         name: DataTypes.STRING(63),
         description: DataTypes.STRING(255),
+        isPublic: DataTypes.BOOLEAN
     });
 }
 

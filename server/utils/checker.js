@@ -5,14 +5,19 @@ function IsValidMail(mail) {
     return expressions.mail_expr.test(mail);
 }
 
-function IsInteger(s) {
+function IsInteger(val) {
     return (
-        typeof(s) == 'number' ||
-        typeof(s) == 'string' && expressions.int_expr.test(s)
+        typeof(val) == 'number' ||
+        typeof(val) == 'string' && expressions.int_expr.test(s)
     );
+}
+
+function IsString(val) {
+    return typeof(val) == 'string';
 }
 
 module.exports = ({
     IsValidMail,
-    IsInteger
+    IsInteger,
+    IsString
 });

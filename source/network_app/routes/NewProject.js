@@ -77,7 +77,7 @@ export default function Main() {
     setState({...state, creating: true});
     Core.Network.createUserProject(state.projectName, state.privacy).then(() => {
       setTimeout(() => {
-        navigate(`/profile/${window.user_info.user_id}/projects`);
+        navigate(`/profile/${window.user_info.id}/projects`);
       }, 500);
     });
   }

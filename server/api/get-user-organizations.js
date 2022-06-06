@@ -5,21 +5,23 @@ const utils = require('../utils');
  * @param {Express.Router} router
  */
 module.exports = (core, router) => {
-    router.post('/get_user_projects', async (req, res) => {
+    router.post('/get_user_organizations', async (req, res) => {
 
         if (!utils.checker.IsInteger(req.body.user_id))
             return res.sendStatus(400);
 
-        const projects = await core.GetModel('User').findOne({
+        const organizations = await core.GetModel('User').findOne({
             attributes: ['id'],
             where: {
                 id: req.body.user_id,
             },
             include: [{
-                model: core.GetModel('Project'),
+                model: core.GetModel('Organization'),
             }]
         }, );
+
+        console.log(organizations.dataValues.Organizations.map(v => v.dataValues));
         
-        return res.send(JSON.stringify({result: true, data: projects.dataValues.Projects.map(v => v.dataValues)}));
+        return res.send(JSON.stringify({result: true, data: organizations.dataValues.Organizations.map(v => v.dataValues)}));
     });
 }

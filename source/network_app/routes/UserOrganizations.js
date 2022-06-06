@@ -108,7 +108,7 @@ export default function UserOrganizations(props) {
       }
     </Toolbar>
     {state.orgs.map((org, id) => {
-      const createdDate = new Date(org.created_dt)
+      const createdDate = new Date(org.createdAt)
       return (
         <div key={id}>
           <Divider/><br/>
@@ -118,7 +118,7 @@ export default function UserOrganizations(props) {
                   <Avatar className={classes.avatar} src={`/organization_photos/${org.logo_name}`} />
                 </div>
                 <div className={classes.org_name_wrapper}>
-                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{org.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][org.public]}</sup></span></Typography>
+                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{org.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["публичный", "приватный"][+org.isPublic]}</sup></span></Typography>
                   <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Работник"][org.right_id]}</Typography>
                 </div>
                 <div style={{flexGrow: 1}}></div>
