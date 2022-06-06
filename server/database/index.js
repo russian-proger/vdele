@@ -49,7 +49,8 @@ module.exports = async (core) => {
     core.SetModel('UserOrganization',       seq.models['UserOrganization']);
     core.SetModel('UserProject',            seq.models['UserProject']);
 
+    
+
 /** Sync */
     await seq.sync({force: false});
-
 }

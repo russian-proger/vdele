@@ -28,6 +28,7 @@ async function Main() {
     require("./route-handlers/auth")(core);
     require("./route-handlers/main")(core);
     require("./route-handlers/network-app")(core);
+    require("./route-handlers/project-app")(core);
     require("./api/index")(core);
 
     core.Listen();

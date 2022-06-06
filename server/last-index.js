@@ -655,7 +655,7 @@ app.all('/project/:project_id/', async (req, res) => {
   apiRoute.post('/new_organization', async (req, res) => {
     const body = req.body;
     if (!body.name || !expressions.orgname_expr.test(body.name)) return res.sendStatus(400);
-    if (!body.privacy || privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
+    if (privacy_values.indexOf(body.privacy) == -1) return res.sendStatus(400);
   
     const logo_name = `${body.name}_${Date.now()}.png`;
     await createOrganization(req.user_info.id, body.name, logo_name, privacy_values.indexOf(body.privacy));

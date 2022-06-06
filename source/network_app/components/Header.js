@@ -142,7 +142,7 @@ export default function Header() {
         <div>
           <Button onClick={onClickAvatar} className={classes.avatar_button} color="inherit">
             <span className={classes.profile_name}>{window.user_info.nick}</span>
-            <Avatar className={classes.avatar} alt="personal photo" src={`/profile_photos/${window.user_info.photo_name}`} />
+            <Avatar className={classes.avatar} alt="personal photo" src={`/profile_photos/${window.user_info.photoName}`} />
           </Button>
           <Menu onClose={onCloseAvatar} open={!!state.menuAvatar}
             anchorEl={state.menuAvatar}

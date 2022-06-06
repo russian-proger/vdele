@@ -12,6 +12,9 @@ module.exports = (core) => {
     require('./get-user')(core, api_router);
     require('./get-user-projects')(core, api_router);
     require('./get-user-organizations')(core, api_router);
+    require('./get-project-workspaces')(core, api_router);
+    require('./get-project-tasks')(core, api_router);
+    require('./remove-project')(core, api_router);
     require('./new-organization')(core, api_router);
     require('./new-user-project')(core, api_router);
     

@@ -46,13 +46,15 @@ export default function Network(self) {
   this.getProjectWorkspaces           = (proj_id) => this.requestAPI('get_project_workspaces',        {proj_id});
   this.getProjectTasks                = (proj_id) => this.requestAPI('get_project_tasks',             {proj_id});
   this.getProjectParticipants         = (proj_id) => this.requestAPI('get_project_participants',      {proj_id});
-
+  
   this.createProjectWorkspace = (proj_id, name) => this.requestAPI('new_project_workspace', {proj_id, name});
   this.deleteProjectWorkspace = (ws_id        ) => this.requestAPI('rem_project_workspace', {ws_id        });
-
+  
   this.addParticipantToProject = (nick, proj_id) => this.requestAPI('add_participant_to_project', {nick, proj_id});
   this.deleteParticipantFromProject = (user_id, proj_id) => this.requestAPI('rem_participant_from_project', {user_id, proj_id});
 
+  this.deleteProject = (proj_id) => this.requestAPI('remove_project', {proj_id});
+  
   this.changeProjectName = (proj_id, name) => this.requestAPI('change_project_name', {proj_id, name});
 
   this.createTask = (ws_id, name, descr) => this.requestAPI('new_task', {ws_id, name, descr});

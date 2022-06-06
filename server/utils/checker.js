@@ -8,7 +8,7 @@ function IsValidMail(mail) {
 function IsInteger(val) {
     return (
         typeof(val) == 'number' ||
-        typeof(val) == 'string' && expressions.int_expr.test(s)
+        typeof(val) == 'string' && expressions.int_expr.test(val)
     );
 }
 

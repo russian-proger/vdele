@@ -325,6 +325,14 @@ export default function App(_props) {
     setModal({name: 'task_view', task_id});
   }
 
+  function removeProject() {
+    if (confirm("Вы уверены, что хотите удалить проект?")){
+      Core.Network.deleteProject(window.project_info.id).then(() => {
+        window.open(`/profile/${window.user_info.id}`, '_self');
+      });
+    }
+  }
+
   const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.workspace_id == state.currentWorkspace);
   console.log(window.user_info.rights.right_id);
   return (
@@ -360,7 +368,7 @@ export default function App(_props) {
                   <ListItemText primary="Участники" />
                 </ListItem>
               { window.user_info.rights.right_id == 0 &&
-                <ListItem button onClick={() => alert("Пока не работает")}>
+                <ListItem button onClick={() => removeProject()}>
                   <ListItemIcon>
                     <DeleteIcon color="secondary" />
                   </ListItemIcon>
@@ -387,12 +395,12 @@ export default function App(_props) {
                 </ListItem>
               }
                 <Divider/><br/>
-                <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(-1)} selected={state.currentWorkspace == -1}>
+                {/* <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(-1)} selected={state.currentWorkspace == -1}>
                   <ListItemIcon>
                     <WifiTetheringIcon />
                   </ListItemIcon>
                   <ListItemText>Общее пространство</ListItemText>
-                </ListItem>
+                </ListItem> */}
                 {projectInfo.workspaces.map((ws, x) => (
                   <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(ws.id)} selected={state.currentWorkspace == ws.id} key={ws.id}>
                     <ListItemIcon>

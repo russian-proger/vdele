@@ -25,6 +25,11 @@ module.exports = (core, router) => {
             ProjectId: proj.id
         });
 
+        await core.GetModel('Workspace').create({
+            name: "Общее пространство",
+            ProjectId: proj.id
+        });
+
         return res.send(JSON.stringify({result: true}));
     });
 }
