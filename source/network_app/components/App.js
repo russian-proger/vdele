@@ -15,6 +15,7 @@ import NewOrganization from '../routes/NewOrganization';
 import Organization from '../routes/Organization';
 import NewProject from '../routes/NewProject';
 import NewOrgProject from '../routes/NewOrgProject';
+import Search from '../routes/Search';
 
 const useStyles = makeStyles((theme) => ({
 }));
@@ -34,6 +35,7 @@ export default function App(_props) {
         <Route path="/new_organization" element={<NewOrganization />}></Route>
         <Route path="/new_project" element={<NewProject />}></Route>
         <Route path="/new_organization_project" element={<NewOrgProject />}></Route>
+        <Route path="/search" element={<Search />}></Route>
       </Routes>
     </BrowserRouter>
   );

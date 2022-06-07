@@ -266,22 +266,24 @@ function TaskViewer(props) {
             </ListSubheader>
           }
         >
-          {state.task.status < 2 &&
+          {window.user_info.rights.right_id == 0 && state.task.status < 2 &&
             <ListItem button onClick={incrementStatus}>
               <ListItemText primary={"В следующую колонку"} />
             </ListItem>
           }
-          {state.task.status > 0 &&
+          {window.user_info.rights.right_id == 0 && state.task.status > 0 &&
             <ListItem button onClick={decrementStatus}>
               <ListItemText primary={"В предыдущую колонку"} />
             </ListItem>
           }
-          <ListItem button onClick={() => props.OnDelete()}>
-            <ListItemIcon>
-              <DeleteIcon color="secondary" />
-            </ListItemIcon>
-            <ListItemText primary="Удалить" />
-          </ListItem>
+          {window.user_info.rights.right_id == 0 &&
+            <ListItem button onClick={() => props.OnDelete()}>
+              <ListItemIcon>
+                <DeleteIcon color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Удалить" />
+            </ListItem>
+          }
         </List>
       </Grid>
     </Grid>

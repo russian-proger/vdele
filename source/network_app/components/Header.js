@@ -110,7 +110,8 @@ export default function Header() {
   const navigate = useNavigate();
 
   const [state, setState] = React.useState({
-    menuAvatar: null
+    menuAvatar: null,
+    searchText: ''
   });
 
   function onClickAvatar(event) {
@@ -121,6 +122,16 @@ export default function Header() {
   function onCloseAvatar() {
     setState({...state, menuAvatar: null});
     return true;
+  }
+
+  function onSearchChange(v) {
+    setState({...state, searchText: v.target.value});
+  }
+
+  function onSearchKeyDown(v) {
+    if (v.key == "Enter") {
+      console.log("Start searching", state.searchText);
+    }
   }
 
   return (
@@ -136,7 +147,7 @@ export default function Header() {
             <SearchIcon />
           </div>
           <InputBase classes={{root: classes.inputRoot, input: classes.input}} placeholder="Поиск…" color="secondary"
-            inputProps={{ 'aria-label': 'search' }} />
+            inputProps={{ 'aria-label': 'search' }} onChange={v => onSearchChange(v)} onKeyDown={(v) => onSearchKeyDown(v)} />
         </div>
         <div className={classes.empty_space} />
         <div>
@@ -158,7 +169,7 @@ export default function Header() {
           >
             <Typography align='center'>{window.user_info.first_name} {window.user_info.last_name}</Typography>
             <div className={classes.separator} />
-            <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}`)}>Профиль</MenuItem>
+            {/* <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}`)}>Профиль</MenuItem> */}
             <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}/projects`)}>Мои проекты</MenuItem>
             <MenuItem onClick={() => onCloseAvatar() && navigate(`/profile/${window.user_info.id}/organizations`)}>Мои организации</MenuItem>
             <div className={classes.separator} />

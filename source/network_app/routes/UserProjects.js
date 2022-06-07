@@ -113,11 +113,11 @@ export default function UserProjects(props) {
             <Toolbar>
               <Button onClick={() => window.open(`/project/${project.id}`, '_self')} className={classes.project_button} key={id}>
                 <div className={classes.project_name_wrapper}>
-                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{project.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][project.public]}</sup></span></Typography>
+                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{project.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][+project.isPublic]}</sup></span></Typography>
                   <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Работник"][project.right_id]}</Typography>
                 </div>
                 <div style={{flexGrow: 1}}></div>
-                <Typography variant="body1" style={{fontSize: '14px'}}>Создано <b>{createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</b></Typography>
+                <Typography variant="body1" style={{fontSize: '14px'}}>Создан <b>{createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</b></Typography>
               </Button>
             </Toolbar>
           <br/>

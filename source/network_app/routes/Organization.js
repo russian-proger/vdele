@@ -86,7 +86,7 @@ export default function Main() {
     orgForbidden: false,
     orgInfo: null,
     loading: true,
-    rights: null,
+    right: null,
     pageID: 0
   });
 
@@ -98,7 +98,7 @@ export default function Main() {
         } else if (res.data === null) {
           setState({...state, orgForbidden: true, loading: false});
         } else {
-          setState({...state, orgInfo: res.data, rights: res.rights, loading: false})
+          setState({...state, orgInfo: res.data, right: res.data.right, loading: false})
         }
       });
     } else {
@@ -114,24 +114,41 @@ export default function Main() {
     return <Typography style={{marginTop: 100}} variant="h5" align="center">Данная организация недоступна для просмотра</Typography>;
   }
 
-  const createdDate = new Date(state.orgInfo.created_dt)
+  const createdDate = new Date(state.orgInfo.createdAt)
   const pad = (s) => (s < 10) ? '0' + s : s;
+  console.log(state.right);
+
+  function enterToOrganization() {
+    Core.Network.enterToOrganization(state.orgInfo.id).then(res => {
+      setState({...state,
+        right: 2
+      });
+    });
+  }
+
+  function leaveFromOrganization() {
+    Core.Network.leaveFromOrganization(state.orgInfo.id).then(res => {
+      setState({...state,
+        right: 3
+      });
+    });
+  }
 
   return (
     <Container className={classes.root_container} maxWidth="lg">
       <Grid container spacing={4}>
         <Grid item xs={3}>
           <Box>
-            <img className={classes.profile_image} src={`/organization_photos/${state.orgInfo.logo_name}`} />
+            <img className={classes.profile_image} src={`/organization_photos/${state.orgInfo.photoName}`} />
           </Box>
 
           <Typography className={classes.name}><b>Организация</b></Typography>
           <Typography className={classes.nickname}><b>{state.orgInfo.name}</b></Typography>
-          {state.rights &&
-            <DestructButton style={{width: '100%'}}>Покинуть</DestructButton>
+          {state.right <= 2 &&
+            <DestructButton onClick={() => enterToOrganization()} style={{width: '100%'}}>Покинуть</DestructButton>
           }
-          {!state.rights &&
-            <SuccessButton style={{width: '100%'}}>Вступить</SuccessButton>
+          {state.right == 3 &&
+            <SuccessButton onClick={() => leaveFromOrganization()} style={{width: '100%'}}>Вступить</SuccessButton>
           }
           <Typography className={classes.created_date}>Дата создания: {createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</Typography>
 
@@ -147,11 +164,11 @@ export default function Main() {
             </Tabs>
             <Divider />
             <TabPanel index={0} value={pageID}>
-              <OrganizationProjects rights={state.rights} orgInfo={state.orgInfo} />
+              <OrganizationProjects right={state.right} orgInfo={state.orgInfo} />
             </TabPanel>
 
             <TabPanel index={1} value={pageID}>
-              <OrganizationParticipants rights={state.rights} orgInfo={state.orgInfo} />
+              <OrganizationParticipants right={state.right} orgInfo={state.orgInfo} />
             </TabPanel>
           </Paper>
         </Grid>

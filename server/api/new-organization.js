@@ -15,15 +15,19 @@ module.exports = (core, router) => {
             return res.sendStatus(400);
         }
 
+        const photoName = Date.now().toString() + parseInt(Math.random() * 5000000).toString() + req.body.name + '.png';
+        await utils.image.GenerateRandomImage(__dirname + `/../../resources/organization_photos/${photoName}`)
+
         const org = await core.GetModel('Organization').create({
             name: req.body.name,
-            isPublic: req.body.privacy == "public"
+            isPublic: req.body.privacy == "public",
+            photoName
         });
 
-        console.log(org);
         await core.GetModel('UserOrganization').create({
             UserId: req.user_info.id,
-            OrganizationId: org.id
+            OrganizationId: org.id,
+            right: 0
         });
 
         return res.send(JSON.stringify({result: true}));

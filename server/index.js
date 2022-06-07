@@ -20,6 +20,7 @@ async function Main() {
         app.use('/dist',                Express.static(`${__dirname}/../dist`));
         app.use('/organization_photos', Express.static(`${__dirname}/../resources/organization_photos`));
         app.use('/profile_photos',      Express.static(`${__dirname}/../resources/profile_photos`));
+        app.use('/images',              Express.static(`${__dirname}/../resources/images`));
         app.use('/scripts',             Express.static(`${__dirname}/../source/scripts`));
     }
 

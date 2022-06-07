@@ -115,14 +115,14 @@ export default function UserOrganizations(props) {
             <Toolbar>
               <Button onClick={() => openOrganization(org.id)} className={classes.org_button} key={id}>
                 <div>
-                  <Avatar className={classes.avatar} src={`/organization_photos/${org.logo_name}`} />
+                  <Avatar className={classes.avatar} src={`/organization_photos/${org.photoName}`} />
                 </div>
                 <div className={classes.org_name_wrapper}>
-                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{org.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["публичный", "приватный"][+org.isPublic]}</sup></span></Typography>
+                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{org.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][+org.isPublic]}</sup></span></Typography>
                   <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Работник"][org.right_id]}</Typography>
                 </div>
                 <div style={{flexGrow: 1}}></div>
-                <Typography variant="body1" style={{fontSize: '14px'}}>Создано <b>{createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</b></Typography>
+                <Typography variant="body1" style={{fontSize: '14px'}}>Создана <b>{createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</b></Typography>
               </Button>
             </Toolbar>
           <br/>

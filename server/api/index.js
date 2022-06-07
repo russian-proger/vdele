@@ -27,6 +27,9 @@ module.exports = (core) => {
     require('./remove-task')                        (core, api_router);
     require('./update-task')                        (core, api_router);
     require('./edit-project-name')                  (core, api_router);
+    require('./get-organization')                   (core, api_router);
+    require('./enter-to-organization')              (core, api_router);
+    require('./leave-from-organization')            (core, api_router);
     
     core.GetApp().use('/api', api_router);
 }
