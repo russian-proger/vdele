@@ -27,7 +27,8 @@ module.exports = (core, router) => {
         const up = await core.GetModel('UserProject').findOne({
             where: {
                 UserId: user.id,
-                ProjectId: req.body.proj_id
+                ProjectId: req.body.proj_id,
+                right: 1
             }
         });
 

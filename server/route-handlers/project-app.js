@@ -16,13 +16,20 @@ function Main(core) {
         
         if (!utils.checker.IsInteger(req.params.project_id)) return res.redirect('/');
         const project = await core.GetModel('Project').findByPk(req.params.project_id); //getProject(req.params.project_id)
+        const up = await core.GetModel('UserProject').findOne({
+          where: {
+            UserId: req.user_info.id,
+            ProjectId: req.params.project_id
+          }
+        });
+
         if (!project) res.redirect('/');
-      
-        if (project.org_id == null) {
+        console.log(up);
+        if (project.OrganizationId == null) {
           // User project
         //   const rights = await getUserProjectRights(req.user_info.id, req.params.project_id);
         //   req.user_info.rights = rights;
-            req.user_info.rights = {right_id: 0};
+            req.user_info.rights = {right_id: (up != null ? up.right : 2)};
         } else {
           // Org project
         }

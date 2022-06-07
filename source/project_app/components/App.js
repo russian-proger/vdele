@@ -42,6 +42,7 @@ import WifiTetheringIcon from '@material-ui/icons/WifiTethering';
 
 import Core from '../core/Core';
 import * as expressions from '../../../server/utils/expressions';
+import ModalCreateTask from './ModalCreateTask';
 
 const useStyles = makeStyles((theme) => ({
   rootGrid: {
@@ -199,7 +200,7 @@ function Participants(props) {
     </Toolbar>
   }
   <br/>
-  <Button onClick={() => exportUsers()}>Экспорт участников</Button>
+  {window.user_info.rights.right_id <= 1 && <Button onClick={() => exportUsers()}>Экспорт участников</Button>}
   <List
     subheader={
       <ListSubheader component="div" id="nested-list-subheader">
@@ -231,9 +232,7 @@ function Participants(props) {
 
 function TaskViewer(props) {
   const [state, setState] = React.useState({
-
     loading: true,
-    user_nick: ''
   })
 
   React.useEffect(() => {
@@ -244,11 +243,48 @@ function TaskViewer(props) {
 
   if (state.loading) return <CircularProgress />
 
+  const incrementStatus = () => {
+    props.OnSetStatus(state.task.id, ++state.task.status);
+  }
+  const decrementStatus = () => {
+    props.OnSetStatus(state.task.id, --state.task.status);
+  }
+
   return (
-    <Box m={3}>
-      <Typography variant="h6">{state.task.name}</Typography>
-      <Typography variant="body2">{state.task.description}</Typography>
-    </Box>
+    <Grid container style={{height: '440px'}}>
+      <Grid item style={{width: '445px'}}>
+        <Box m={3}>
+          <Typography variant="h6">{state.task.name}</Typography>
+          <Typography variant="body2">{state.task.description}</Typography>
+        </Box>
+      </Grid>
+      <Grid item style={{width: '250px', borderLeft: '1px solid #d9d9d9', paddingLeft: '5px'}}>
+        <List
+          subheader={
+            <ListSubheader component="div" id="nested-list-subheader">
+              Действия
+            </ListSubheader>
+          }
+        >
+          {state.task.status < 2 &&
+            <ListItem button onClick={incrementStatus}>
+              <ListItemText primary={"В следующую колонку"} />
+            </ListItem>
+          }
+          {state.task.status > 0 &&
+            <ListItem button onClick={decrementStatus}>
+              <ListItemText primary={"В предыдущую колонку"} />
+            </ListItem>
+          }
+          <ListItem button onClick={() => props.OnDelete()}>
+            <ListItemIcon>
+              <DeleteIcon color="secondary" />
+            </ListItemIcon>
+            <ListItemText primary="Удалить" />
+          </ListItem>
+        </List>
+      </Grid>
+    </Grid>
   )
 }
 
@@ -325,7 +361,8 @@ export default function App(_props) {
     if (confirm("Вы действительно хотите удалить?")) {
       Core.Network.deleteProjectWorkspace(ws_id).then(() => {
         setProjectInfo({...projectInfo,
-          workspaces: projectInfo.workspaces.filter(v => v.id != ws_id)
+          workspaces: projectInfo.workspaces.filter(v => v.id != ws_id),
+          tasks: projectInfo.tasks.filter(v => v.WorkspaceId != ws_id)
         })
       })
     }
@@ -335,10 +372,13 @@ export default function App(_props) {
     setState({...state, currentWorkspace});
   }
 
-  function createTask() {
-    Core.Network.createTask(state.currentWorkspace, state.newTaskName, state.newTaskDescription);
-    setModal({name: ''});
-    setState({...state, newTaskName: '', newTaskDescription: ''});
+  function createTask(taskName, taskDescription) {
+    Core.Network.createTask(state.currentWorkspace, taskName, taskDescription).then(res => {
+      setModal({name: ''});
+      setProjectInfo({...projectInfo,
+        tasks: [...projectInfo.tasks, res.data]
+      });
+    });
   }
 
   function openTask(task_id) {
@@ -352,7 +392,28 @@ export default function App(_props) {
       });
     }
   }
-  console.log(state, projectInfo);
+
+  function deleteTask(task_id) {
+    if (confirm("Вы уверены, что хотите удалить это задание?")) {
+      Core.Network.deleteTask(task_id).then(() => {
+        setModal({name: ''});
+        setProjectInfo({...projectInfo,
+          tasks: projectInfo.tasks.filter(v => v.id != task_id)
+        });
+      });
+    }
+  }
+
+  function setTaskStatus(task_id, status) {
+    let task = projectInfo.tasks.find(v => v.id == task_id);
+    task.status = status;
+    Core.Network.updateTask(task_id, task).then((res) => {
+      setProjectInfo({...projectInfo,
+        tasks: [...projectInfo.tasks.filter(v => v.id != task_id), res.data]
+      });
+    });
+  }
+
   const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.WorkspaceId == state.currentWorkspace);
   return (
     <>
@@ -454,11 +515,11 @@ export default function App(_props) {
           }
           { projectInfo.tasks !== null &&
             <Grid className={classes.tasksGrid} container spacing={3}>
-            { ["В очереди", "На проверке", "Выполнено"].map((title, state_id) => (
+            { ["В очереди", "В процессе", "Выполнено"].map((title, state_id) => (
               <Grid key={state_id} item sm={4}>
                 <Paper className={classes.tasksList}>
                   <Typography variant="h6" style={{padding: 5, paddingLeft: 20, fontSize: '16px'}}>{title}</Typography>
-                  { tasks.filter(task => /**task.stateId */0 == state_id).map((task, x) => (
+                  { tasks.filter(task => task.status == state_id).map((task, x) => (
                     <div onClick={() => openTask(task.id)} key={x} className="task">{task.name}</div>
                   )) }
                   {!state_id && state.currentWorkspace != -1 && window.user_info.rights.right_id <= 1 &&
@@ -474,17 +535,6 @@ export default function App(_props) {
           }
           </Container>
         </Grid>
-        {/* <Grid item style={{width: 250}}>
-          <div className={classes.rightPanel}>
-            <div className={classes.relWrapper}>
-              <Box m={1}>
-                <Typography variant="h6" align="center">История действий</Typography>
-                <Divider /><br/>
-                
-              </Box>
-            </div>
-          </div>
-        </Grid> */}
       </Grid>
       <Modal open={modal.name == "participants"} onClose={() => setModal({name: ''})}>
         <div className="modal_window_wrapper">
@@ -500,24 +550,17 @@ export default function App(_props) {
           <div className="modal_window">
             <Typography align="center" variant="h5">Просмотр задачи</Typography>
             <Divider/><br/>
-            <TaskViewer task_id={modal.task_id} />
+            <TaskViewer task_id={modal.task_id}
+              OnSetStatus={(task_id, status) => setTaskStatus(task_id, status)}
+              OnDelete={() => {deleteTask(modal.task_id)}} />
           </div>
         </div>
       </Modal>
-      <Modal open={modal.name == "task_creating"} onClose={() => setModal({name: ''})}>
-        <div className="modal_window_wrapper">
-          <div className="modal_window">
-            <Typography align="center" variant="h5">Новая задача</Typography>
-            <Divider/><br/>
-            <Box m={1}>
-              <TextField onChange={(ev) => setState({...state, newTaskName: ev.currentTarget.value})} value={state.newTaskName} style={{width: '100%'}} label="Название задания" variant="outlined" /><br/><br/>
-              <TextField onChange={(ev) => setState({...state, newTaskDescription: ev.currentTarget.value})} value={state.newTaskDescription} style={{width: '100%'}} multiline label="Описание" variant="outlined" />
-            </Box>
-
-            <Button onClick={() => createTask()} color="primary" variant="contained">Создать</Button>
-          </div>
-        </div>
-      </Modal>
+      
+      <ModalCreateTask
+         open={modal.name == "task_creating"} onClose={() => setModal({name: ''})}
+         onCreateTask={(taskName, taskDescription) => createTask(taskName, taskDescription)}
+      />
     </>
   );
 }

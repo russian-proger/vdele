@@ -25,6 +25,7 @@ module.exports = (core) => {
     require('./new-task')                           (core, api_router);
     require('./get-task')                           (core, api_router);
     require('./remove-task')                        (core, api_router);
+    require('./update-task')                        (core, api_router);
     require('./edit-project-name')                  (core, api_router);
     
     core.GetApp().use('/api', api_router);

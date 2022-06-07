@@ -11,6 +11,7 @@ module.exports = async (core) => {
     const User = require('./User')(core);
     const Project = require('./Project')(core);
     const Workspace = require('./Workspace')(core);
+    const UserProject = require('./UserProject')(core);
 
 
 
@@ -33,8 +34,8 @@ module.exports = async (core) => {
     Organization.belongsToMany(User, { through: 'UserOrganization' });
     
     // UserProject
-    User.belongsToMany(Project, { through: 'UserProject' });
-    Project.belongsToMany(User, { through: 'UserProject' });
+    User.belongsToMany(Project, { through: UserProject });
+    Project.belongsToMany(User, { through: UserProject });
 
 
 
@@ -46,11 +47,12 @@ module.exports = async (core) => {
     core.SetModel('User',                   User);
     core.SetModel('Project',                Project);
     core.SetModel('Workspace',              Workspace);
+    core.SetModel('UserProject',            UserProject);
     core.SetModel('UserOrganization',       seq.models['UserOrganization']);
-    core.SetModel('UserProject',            seq.models['UserProject']);
 
     
 
 /** Sync */
+    // seq.query("SET FOREIGN_KEY_CHECKS=0");
     await seq.sync({force: false});
 }

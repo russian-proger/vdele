@@ -18,9 +18,10 @@ module.exports = (core, router) => {
         const task = await core.GetModel('Task').create({
             name: req.body.name,
             description: req.body.descr,
+            status: 0,
             WorkspaceId: req.body.ws_id
         });
 
-        return res.send(JSON.stringify({result: true}));
+        return res.send(JSON.stringify({result: true, data: task}));
     });
 }

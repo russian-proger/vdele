@@ -54,6 +54,8 @@ export default function Network(self) {
   this.deleteParticipantFromProject = (user_id, proj_id) => this.requestAPI('remove_participant_from_project', {user_id, proj_id});
 
   this.deleteProject = (proj_id) => this.requestAPI('remove_project', {proj_id});
+  this.deleteTask = (task_id) => this.requestAPI('remove_task', {task_id});
+  this.updateTask = (task_id, task) => this.requestAPI('update_task', {task_id, task});
   
   this.changeProjectName = (proj_id, name) => this.requestAPI('change_project_name', {proj_id, name});
 

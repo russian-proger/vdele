@@ -22,7 +22,8 @@ module.exports = (core, router) => {
 
         await core.GetModel('UserProject').create({
             UserId: req.user_info.id,
-            ProjectId: proj.id
+            ProjectId: proj.id,
+            right: 0
         });
 
         await core.GetModel('Workspace').create({

@@ -10,7 +10,7 @@ module.exports = (core, router) => {
         if (!utils.checker.IsInteger(req.body.user_id))
             return res.sendStatus(400);
 
-        const projects = await core.GetModel('User').findOne({
+        let projects = (await core.GetModel('User').findOne({
             attributes: ['id'],
             where: {
                 id: req.body.user_id,
@@ -18,8 +18,13 @@ module.exports = (core, router) => {
             include: [{
                 model: core.GetModel('Project'),
             }]
-        }, );
+        }, )).dataValues.Projects.map(v => v.dataValues);
         
-        return res.send(JSON.stringify({result: true, data: projects.dataValues.Projects.map(v => v.dataValues)}));
+        if (req.body.user_id != req.user_info.id) {
+            projects = projects.filter(v => v.isPublic);
+        }
+        
+
+        return res.send(JSON.stringify({result: true, data: projects}));
     });
 }
