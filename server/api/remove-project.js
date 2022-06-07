@@ -19,6 +19,14 @@ module.exports = (core, router) => {
             },
         });
 
+        const user_projects = await core.GetModel('UserProject').findAll({
+            where: {
+                ProjectId: project.dataValues.id
+            }
+        });
+
+        user_projects.forEach(v => v.destroy());
+
         workspaces.forEach(async (v) => {
             const tasks = await core.GetModel('Task').findAll({
                 attributes: ['id'],

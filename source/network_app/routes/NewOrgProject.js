@@ -92,7 +92,7 @@ export default function Main() {
       <br/><Divider/><br/>
       <Paper style={{paddingBottom: '1px'}}>
         <Toolbar>
-          <Avatar className={classes.avatar} src={`organization_photos/${location.state.logo_name}`} />
+          <Avatar className={classes.avatar} src={`organization_photos/${location.state.photoName}`} />
           <Typography variant="body1">{location.state.name}</Typography>
           <Typography style={{marginRight: 15, marginLeft: 15}} variant="h4">/</Typography>
           <TextField onChange={(ev) => setState({...state, projectName: ev.currentTarget.value})} className={classes.project_field} size="small" id="outlined-basic" label="Название проекта" variant="outlined" value={state.projectName} />
@@ -104,7 +104,7 @@ export default function Main() {
             <RadioGroup aria-label="privacy" value={state.privacy} onChange={(ev, privacy) => setState({...state, privacy})}>
               <FormControlLabel value="public" control={<Radio className={classes.radio} color="primary" />} label={PrivacyLabel(PublicIcon, '#555555', "Публичный", location.state.public ? "Видно всем пользователям" : "Видно всем сотрудникам организации")} />
               <div style={{width:1, height:7}}/>
-              <FormControlLabel value="private" control={<Radio className={classes.radio} color="primary" />} label={PrivacyLabel(LockIcon, '#9a6700', "Приватный", "Видно только менеджерам и владельцу организации")} />
+              <FormControlLabel value="private" control={<Radio className={classes.radio} color="primary" />} label={PrivacyLabel(LockIcon, '#9a6700', "Приватный", "Видно только менеджерам и владельцу организации, а также добавленным в проект участникам")} />
             </RadioGroup>
           </FormControl>
         </Box>

@@ -27,8 +27,7 @@ module.exports = (core, router) => {
         const up = await core.GetModel('UserProject').findOne({
             where: {
                 UserId: user.id,
-                ProjectId: req.body.proj_id,
-                right: 1
+                ProjectId: req.body.proj_id
             }
         });
 
@@ -38,9 +37,10 @@ module.exports = (core, router) => {
 
         await core.GetModel('UserProject').create({
             UserId: user.dataValues.id,
-            ProjectId: req.body.proj_id
+            ProjectId: req.body.proj_id,
+            right: 2
         });
 
-        return res.send(JSON.stringify({result: true, data: user.dataValues }));
+        return res.send(JSON.stringify({result: true, data: {...user.dataValues, right: 2} }));
     });
 }

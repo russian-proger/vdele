@@ -21,7 +21,6 @@ module.exports = (core, router) => {
                 OrganizationId: req.body.org_id,
                 right: 2
             });
-            console.log(user_org);
 
             return res.send(JSON.stringify({result: true, data: {...user_org}}));
         }

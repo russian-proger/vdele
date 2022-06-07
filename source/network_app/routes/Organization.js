@@ -133,6 +133,14 @@ export default function Main() {
       });
     });
   }
+  
+  function deleteOrganization() {
+    if (confirm(`Вы уверены, что хотите удалить организацию "${state.orgInfo.name}"?`)) {
+      Core.Network.removeOrganization(state.orgInfo.id).then(res => {
+        navigate('/');
+      });
+    }
+  }
 
   return (
     <Container className={classes.root_container} maxWidth="lg">
@@ -144,7 +152,10 @@ export default function Main() {
 
           <Typography className={classes.name}><b>Организация</b></Typography>
           <Typography className={classes.nickname}><b>{state.orgInfo.name}</b></Typography>
-          {state.right <= 2 &&
+          {state.right == 0 &&
+            <DestructButton onClick={() => deleteOrganization()} style={{width: '100%'}}>Удалить</DestructButton>
+          }
+          {state.right >= 1 && state.right <= 2 &&
             <DestructButton onClick={() => leaveFromOrganization()} style={{width: '100%'}}>Покинуть</DestructButton>
           }
           {state.right == 3 &&

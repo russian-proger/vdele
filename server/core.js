@@ -20,7 +20,8 @@ function Core() {
 
     /** ORM instance */
     const sequelize = new Sequelize(config.database.schema, config.database.user, config.database.password, {
-        dialect: "mysql"
+        dialect: "mysql",
+        logging: false
     });
 
     /**

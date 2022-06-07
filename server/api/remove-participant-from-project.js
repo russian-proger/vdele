@@ -13,7 +13,7 @@ module.exports = (core, router) => {
         ) {      
             return res.sendStatus(400);
         }
-        console.log(req.body);
+
         const user_project = await core.GetModel('UserProject').findOne({
             where: {
                 UserId: req.body.user_id,

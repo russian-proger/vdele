@@ -10,18 +10,23 @@ module.exports = (core, router) => {
         if (!utils.checker.IsInteger(req.body.user_id))
             return res.sendStatus(400);
 
-        const organizations = await core.GetModel('User').findOne({
+        const user = await core.GetModel('User').findOne({
             attributes: ['id'],
             where: {
-                id: req.body.user_id,
+                id: req.body.user_id
             },
             include: [{
                 model: core.GetModel('Organization'),
+                where: {
+                    isPublic: (req.body.user_id == req.user_info.id ? [0, 1] : [1])
+                }
             }]
         }, );
 
-        console.log(organizations.dataValues.Organizations.map(v => v.dataValues));
+        if (user == null) {
+            return res.send(JSON.stringify({result: true, data: []}));
+        }
         
-        return res.send(JSON.stringify({result: true, data: organizations.dataValues.Organizations.map(v => v.dataValues)}));
+        return res.send(JSON.stringify({result: true, data: user.dataValues.Organizations.map(v => v.dataValues)}));
     });
 }

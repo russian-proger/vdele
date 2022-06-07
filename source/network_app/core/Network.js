@@ -44,4 +44,5 @@ export default function Network(self) {
   this.getOrganizationParticipants = (org_id) => this.requestAPI('get_organization_participants', {org_id});
   this.enterToOrganization = (org_id) => this.requestAPI('enter_to_organization', {org_id});
   this.leaveFromOrganization = (org_id) => this.requestAPI('leave_from_organization', {org_id});
+  this.removeOrganization = (org_id) => this.requestAPI('remove_organization', {org_id});
 }

@@ -25,8 +25,10 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
+  MenuItem,
   Modal,
   Paper,
+  Select,
   TextField,
   Toolbar,
   Typography
@@ -188,19 +190,27 @@ function Participants(props) {
     tableToExcel(table, 'Список участников', "Список участников.xls");
   }
 
+  function updateUserProjectRight(user_id, right) {
+    Core.Network.updateUserProjectRight(window.project_info.id, user_id, right).then(v => {
+      setState({...state,
+        users: [...state.users.filter(v => v.id != user_id), v.data]
+      });
+    });
+    // if ()
+    // console.log(user_id, right, window.project_info.id);
+  }
+
   if (state.loading) return <CircularProgress />
 
   return (
 <>
   <Typography style={{marginLeft: 25}}>Добавить пользователя</Typography>
-  { window.user_info.rights.right_id <= 1 &&
     <Toolbar>
-      <TextField fullWidth onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
+      <TextField disabled={window.user_info.rights.right_id > 1} fullWidth onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
       <Box m={2} display="flex" justifyContent="flex-end">
-        <Button variant="contained" size="large" onClick={() => addUser()}>Добавить</Button>
+        <Button disabled={window.user_info.rights.right_id > 1} variant="contained" size="large" onClick={() => addUser()}>Добавить</Button>
       </Box>  
     </Toolbar>
-  }
   {window.user_info.rights.right_id <= 1 &&
     <Box mt={2} mr={3} display="flex" justifyContent="flex-end"><Button onClick={() => exportUsers()}>Экспорт участников EXCEL</Button></Box>
   }
@@ -211,24 +221,34 @@ function Participants(props) {
       </ListSubheader>
     }>
     { state.users.map((user, x) => (
-    <>
+    <React.Fragment key={x}>
       <Divider/>
-      <ListItem key={x}>
+      <ListItem>
         <ListItemAvatar>
           <IconButton onClick={() => window.open(`/profile/${user.id}`, '_self')}>
             <Avatar src={`/profile_photos/${user.photoName}`} />
           </IconButton>
         </ListItemAvatar>
         <ListItemText>{user.firstName} {user.lastName}</ListItemText>
-      { window.user_info.rights.right_id <= 1 &&
         <ListItemSecondaryAction>
-          <IconButton onClick={() => deleteUser(user.id, user.nick)} disabled={user.id == window.user_info.id}>
+          {user.right != null &&
+            <Select value={user.right}
+              disabled={user.right == 0 || user.id == window.user_info.id || window.user_info.rights.right_id >= user.right}
+              onChange={ev => updateUserProjectRight(user.id, ev.target.value)}
+            >  
+              {user.right == 0 && <MenuItem value={0}>Создатель</MenuItem>}
+              <MenuItem value={1}>Менеджер</MenuItem>
+              <MenuItem value={2}>Участник</MenuItem>
+            </Select>
+          }
+        { window.user_info.rights.right_id <= 1 &&
+          <IconButton onClick={() => deleteUser(user.id, user.nick)} disabled={user.id == window.user_info.id || window.user_info.rights.right_id >= user.right}>
             <DeleteIcon />
           </IconButton>
+        }
         </ListItemSecondaryAction>
-      }
       </ListItem>
-    </>
+    </React.Fragment>
     ))
     }
   </List>
@@ -496,9 +516,11 @@ export default function App(_props) {
                     </ListItemIcon>
                     <ListItemText primary={ws.name} />
                     <ListItemSecondaryAction>
-                      <IconButton onClick={() => deleteWorkspace(ws.id)} aria-label="delete">
-                        <DeleteIcon />
-                      </IconButton>
+                      {window.user_info.rights.right_id <= 1 &&
+                        <IconButton onClick={() => deleteWorkspace(ws.id)} aria-label="delete">
+                          <DeleteIcon />
+                        </IconButton>
+                      }
                     </ListItemSecondaryAction>
                   </ListItem>
                 ))}

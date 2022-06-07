@@ -76,7 +76,6 @@ export default function OrganizationProjects(props) {
   
   React.useState(() => {
     Core.Network.getOrganizationProjects(params.org_id).then(res => {
-      console.log(res);
       setState({...state, _projects: res.data, projects: res.data});
     });
   }, []);
@@ -94,19 +93,19 @@ export default function OrganizationProjects(props) {
 
 
   const pad = (s) => (s < 10) ? '0' + s : s;
-  console.log(props);
+
   return (
   <>
     <Toolbar>
       <TextField onChange={onChangeSearchText} value={state.search_text} size="small" className={classes.search} label="Поиск" variant="outlined" />
-      { props.rights && props.rights.right_id != 2 &&
+      { props.right !== undefined && props.right < 2 &&
         <ThemeProvider theme={green_theme}>
           <Button onClick={() => navigate('/new_organization_project', {state: props.orgInfo})} variant="contained" color="primary">Создать</Button>
         </ThemeProvider>
       }
     </Toolbar>
     {state.projects.map((project, id) => {
-      const createdDate = new Date(project.created_dt)
+      const createdDate = new Date(project.createdAt)
       return (
         <div key={id}>
           <Divider/><br/>
