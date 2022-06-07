@@ -76,7 +76,7 @@ export default function UserProjects(props) {
   });
   
   React.useState(() => {
-    Core.Network.getUserProjects(window.user_info.id).then(res => {
+    Core.Network.getUserProjects(params.user_id).then(res => {
       setState({...state, _projects: res.data, projects: res.data});
     });
   }, []);

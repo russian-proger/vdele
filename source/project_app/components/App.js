@@ -136,25 +136,32 @@ function Participants(props) {
     Core.Network.addParticipantToProject(state.user_nick, window.project_info.id).then(res => {
       if (res.result) {
         alert("Пользователь успешно добавлен в проект");
+        return setState({...state,
+          users: [...state.users, res.data],
+          user_nick: ''
+        });
       } else if (res.reason == 0) alert("Пользователя с таким ником не существует");
       else if (res.reason == 1) alert("Пользователь уже является участником проекта");
       else alert("Неизвестная ошибка");
       setState({...state, user_nick: ''});
-      console.log(res);
     });
   }
 
   function deleteUser(user_id, nick) {
     if (!confirm(`Вы уверены, что хотите удалить пользователя с ником "${nick}"?`)) return;
     Core.Network.deleteParticipantFromProject(user_id, window.project_info.id).then(res => {
-      if (res.result) alert("Пользователь удалён с проекта");
+      if (res.result) {
+        alert("Пользователь удалён с проекта");
+        setState({...state,
+          users: state.users.filter(v => v.id != user_id)
+        });
+      }
       else if (res.reason == 0) alert("Пользователь уже удалён с проекта");
       else alert("Неизвестная ошибка");
     });
   }
 
   function exportUsers() {
-    console.log(state.users);
     const table = document.createElement("table");
     table.innerHTML = `
       <thead>
@@ -170,14 +177,13 @@ function Participants(props) {
           return `
           <tr>
             <td>${user.nick}</td>
-            <td>${user.first_name}</td>
-            <td>${user.last_name}</td>
+            <td>${user.firstName}</td>
+            <td>${user.lastName}</td>
             <td>${user.mail}</td>
           </tr>`;
         }).join('')}
       </tbody>
     `;
-    console.log(table);
     tableToExcel(table, 'Список участников', "Список участников.xls");
   }
 
@@ -204,10 +210,10 @@ function Participants(props) {
       <ListItem key={x}>
         <ListItemAvatar>
           <IconButton onClick={() => window.open(`/profile/${user.id}`, '_self')}>
-            <Avatar src={`/profile_photos/${user.photo_name}`} />
+            <Avatar src={`/profile_photos/${user.photoName}`} />
           </IconButton>
         </ListItemAvatar>
-        <ListItemText>{user.first_name} {user.second_name}</ListItemText>
+        <ListItemText>{user.firstName} {user.lastName}</ListItemText>
       { window.user_info.rights.right_id <= 1 &&
         <ListItemSecondaryAction>
           <IconButton onClick={() => deleteUser(user.id, user.nick)} disabled={user.id == window.user_info.id}>
@@ -346,9 +352,8 @@ export default function App(_props) {
       });
     }
   }
-
-  const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.workspace_id == state.currentWorkspace);
-  console.log(window.user_info.rights.right_id);
+  console.log(state, projectInfo);
+  const tasks = projectInfo.tasks && projectInfo.tasks.filter(task => state.currentWorkspace == -1 || task.WorkspaceId == state.currentWorkspace);
   return (
     <>
       <Header />
@@ -409,12 +414,12 @@ export default function App(_props) {
                 </ListItem>
               }
                 <Divider/><br/>
-                {/* <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(-1)} selected={state.currentWorkspace == -1}>
+                <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(-1)} selected={state.currentWorkspace == -1}>
                   <ListItemIcon>
                     <WifiTetheringIcon />
                   </ListItemIcon>
                   <ListItemText>Общее пространство</ListItemText>
-                </ListItem> */}
+                </ListItem>
                 {projectInfo.workspaces.map((ws, x) => (
                   <ListItem className={classes.wsItem} button onClick={() => onChangeWorkspace(ws.id)} selected={state.currentWorkspace == ws.id} key={ws.id}>
                     <ListItemIcon>
@@ -453,7 +458,7 @@ export default function App(_props) {
               <Grid key={state_id} item sm={4}>
                 <Paper className={classes.tasksList}>
                   <Typography variant="h6" style={{padding: 5, paddingLeft: 20, fontSize: '16px'}}>{title}</Typography>
-                  { tasks.filter(task => task.state_id == state_id).map((task, x) => (
+                  { tasks.filter(task => /**task.stateId */0 == state_id).map((task, x) => (
                     <div onClick={() => openTask(task.id)} key={x} className="task">{task.name}</div>
                   )) }
                   {!state_id && state.currentWorkspace != -1 && window.user_info.rights.right_id <= 1 &&

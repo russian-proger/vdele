@@ -9,6 +9,7 @@ function DefineTask(core) {
     return core.GetSequelize().define('Task', {
         name: DataTypes.STRING(63),
         description: DataTypes.STRING(255),
+        
     });
 }
 
