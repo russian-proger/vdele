@@ -80,7 +80,9 @@ function Auth(core) {
                 firstName: req.body.first_name,
                 lastName: req.body.last_name,
                 photoName: `${req.body.nick}.png`
-            })
+            });
+
+            utils.image.GenerateRandomImage(`${__dirname}/../../resources/profile_photos/${req.body.nick}.png`);
     
             return res.redirect('/login');
         } else {

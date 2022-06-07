@@ -265,6 +265,7 @@ export default function App(_props) {
     allTasks: null
   });
 
+  const [_count, forceUpdate] = React.useReducer(x => x + 1, 0);
 
   React.useEffect(() => {
     let workspaces = null;
@@ -292,7 +293,10 @@ export default function App(_props) {
       name = prompt('Введите новое имя проекта');
     }
     if (name) {
-      Core.Network.changeProjectName(window.project_info.id, name);
+      Core.Network.changeProjectName(window.project_info.id, name).then(() => {
+        window.project_info.name = name;
+        forceUpdate();
+      })
     }
   }
 
@@ -302,12 +306,22 @@ export default function App(_props) {
       name = prompt('Введите имя пространства');
     }
 
-    if (name !== null) Core.Network.createProjectWorkspace(window.project_info.id, name);
+    if (name !== null) {
+      Core.Network.createProjectWorkspace(window.project_info.id, name).then(res => {
+        setProjectInfo({...projectInfo,
+          workspaces: [...projectInfo.workspaces, res.data]
+        });
+      })
+    }
   }
 
   function deleteWorkspace(ws_id) {
     if (confirm("Вы действительно хотите удалить?")) {
-      Core.Network.deleteProjectWorkspace(ws_id);
+      Core.Network.deleteProjectWorkspace(ws_id).then(() => {
+        setProjectInfo({...projectInfo,
+          workspaces: projectInfo.workspaces.filter(v => v.id != ws_id)
+        })
+      })
     }
   }
 

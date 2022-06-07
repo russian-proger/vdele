@@ -12,6 +12,23 @@ module.exports = (core, router) => {
             return res.sendStatus(400);
 
         const project = await core.GetModel('Project').findByPk(req.body.proj_id);
+        const workspaces = await core.GetModel('Workspace').findAll({
+            attributes: ['id'],
+            where: {
+                ProjectId: project.id
+            },
+        });
+
+        workspaces.forEach(async (v) => {
+            const tasks = await core.GetModel('Task').findAll({
+                attributes: ['id'],
+                where: {
+                    WorkspaceId: v.dataValues.id
+                }
+            });
+            tasks.forEach(v => v.destroy());
+            v.destroy();
+        });
 
         if (project != null) {
             project.destroy();
