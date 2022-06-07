@@ -145,10 +145,10 @@ export default function Main() {
           <Typography className={classes.name}><b>Организация</b></Typography>
           <Typography className={classes.nickname}><b>{state.orgInfo.name}</b></Typography>
           {state.right <= 2 &&
-            <DestructButton onClick={() => enterToOrganization()} style={{width: '100%'}}>Покинуть</DestructButton>
+            <DestructButton onClick={() => leaveFromOrganization()} style={{width: '100%'}}>Покинуть</DestructButton>
           }
           {state.right == 3 &&
-            <SuccessButton onClick={() => leaveFromOrganization()} style={{width: '100%'}}>Вступить</SuccessButton>
+            <SuccessButton onClick={() => enterToOrganization()} style={{width: '100%'}}>Вступить</SuccessButton>
           }
           <Typography className={classes.created_date}>Дата создания: {createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</Typography>
 

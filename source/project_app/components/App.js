@@ -195,12 +195,15 @@ function Participants(props) {
   <Typography style={{marginLeft: 25}}>Добавить пользователя</Typography>
   { window.user_info.rights.right_id <= 1 &&
     <Toolbar>
-      <TextField onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
-      <Button onClick={() => addUser()}>Добавить</Button>
+      <TextField fullWidth onChange={ev => setState({...state, user_nick: ev.currentTarget.value})} value={state.user_nick} variant="outlined" label="Никнейм пользователя"></TextField>
+      <Box m={2} display="flex" justifyContent="flex-end">
+        <Button variant="contained" size="large" onClick={() => addUser()}>Добавить</Button>
+      </Box>  
     </Toolbar>
   }
-  <br/>
-  {window.user_info.rights.right_id <= 1 && <Button onClick={() => exportUsers()}>Экспорт участников</Button>}
+  {window.user_info.rights.right_id <= 1 &&
+    <Box mt={2} mr={3} display="flex" justifyContent="flex-end"><Button onClick={() => exportUsers()}>Экспорт участников EXCEL</Button></Box>
+  }
   <List
     subheader={
       <ListSubheader component="div" id="nested-list-subheader">
@@ -208,6 +211,8 @@ function Participants(props) {
       </ListSubheader>
     }>
     { state.users.map((user, x) => (
+    <>
+      <Divider/>
       <ListItem key={x}>
         <ListItemAvatar>
           <IconButton onClick={() => window.open(`/profile/${user.id}`, '_self')}>
@@ -223,6 +228,7 @@ function Participants(props) {
         </ListItemSecondaryAction>
       }
       </ListItem>
+    </>
     ))
     }
   </List>

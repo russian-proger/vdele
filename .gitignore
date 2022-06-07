@@ -2,3 +2,5 @@ docs
 node_modules
 dist
 *.ini
+resources/organization_photos
+resources/profile_photos

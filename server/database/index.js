@@ -38,7 +38,10 @@ module.exports = async (core) => {
     User.belongsToMany(Project, { through: UserProject });
     Project.belongsToMany(User, { through: UserProject });
 
-
+    Project.hasMany(UserProject);
+    User.hasMany(UserProject);
+    UserProject.belongsTo(User);
+    UserProject.belongsTo(Project);
 
 
 /** Uploading to core */

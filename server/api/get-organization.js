@@ -13,8 +13,10 @@ module.exports = (core, router) => {
 
         const organization = await core.GetModel('Organization').findByPk(req.body.org_id);
         const user_org = await core.GetModel('UserOrganization').findOne({
-            UserId: req.user_info.id,
-            OrgId: req.body.org_id
+            where:{
+                UserId: req.user_info.id,
+                OrganizationId: req.body.org_id
+            }
         });
 
         if (organization == null || (!organization.dataValues.isPublic && user_org == null)) {

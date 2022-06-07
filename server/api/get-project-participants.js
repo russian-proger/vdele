@@ -13,9 +13,21 @@ module.exports = (core, router) => {
 
         const project = await core.GetModel('Project').findOne({
             where: { id: req.body.proj_id },
-            include: [core.GetModel('User')]
+            include: [{
+                model: core.GetModel('UserProject'),
+                attributes: ['right'],
+                include: [{
+                    model: core.GetModel('User'),
+                    attributes: ['id', 'nick', 'mail', 'firstName', 'lastName', 'photoName'],
+                }]
+            }]
         });
 
-        return res.send(JSON.stringify({result: true, data: project.Users.map(v => v.dataValues)}));
+        const users = project.UserProjects.map(v => ({
+            right: v.right,
+            ...v.dataValues.User.dataValues
+        }));
+
+        return res.send(JSON.stringify({result: true, data: users}));
     });
 }

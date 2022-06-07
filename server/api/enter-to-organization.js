@@ -12,16 +12,18 @@ module.exports = (core, router) => {
             return res.sendStatus(400);
 
         const organization = await core.GetModel('Organization').findByPk(req.body.org_id);
-        const user_org = await core.GetModel('UserOrganization').findOne({
-            UserId: req.user_info.id,
-            OrgId: req.body.org_id
-        });
-
-        if (organization == null || (!organization.dataValues.isPublic && user_org == null)) {
+        
+        if (organization == null || !organization.dataValues.isPublic) {
             return res.send(JSON.stringify({result: false}));
         } else {
-            const right = (user_org != null ? user_org.dataValues.right : 3);
-            return res.send(JSON.stringify({result: true, data: {...organization.dataValues, right: right}}));
+            const user_org = await core.GetModel('UserOrganization').create({
+                UserId: req.user_info.id,
+                OrganizationId: req.body.org_id,
+                right: 2
+            });
+            console.log(user_org);
+
+            return res.send(JSON.stringify({result: true, data: {...user_org}}));
         }
     });
 }

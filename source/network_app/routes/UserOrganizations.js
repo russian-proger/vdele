@@ -75,7 +75,7 @@ export default function UserOrganizations(props) {
   });
   
   React.useState(() => {
-    Core.Network.getUserOrganizations(window.user_info.id).then(res => {
+    Core.Network.getUserOrganizations(params.user_id).then(res => {
       setState({...state, _orgs: res.data, orgs: res.data});
     });
   }, []);
@@ -118,8 +118,8 @@ export default function UserOrganizations(props) {
                   <Avatar className={classes.avatar} src={`/organization_photos/${org.photoName}`} />
                 </div>
                 <div className={classes.org_name_wrapper}>
-                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{org.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватный", "публичный"][+org.isPublic]}</sup></span></Typography>
-                  <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Работник"][org.right_id]}</Typography>
+                  <Typography variant="h6" style={{fontSize:'20px', marginBottom: 7}}>{org.name} <span style={{fontWeight: 400, fontSize: '12px'}}><sup>{["приватная", "публичная"][+org.isPublic]}</sup></span></Typography>
+                  <Typography variant="body1" style={{fontSize: '14px'}}>{["Владелец", "Менеджер", "Участник"][org.right]}</Typography>
                 </div>
                 <div style={{flexGrow: 1}}></div>
                 <Typography variant="body1" style={{fontSize: '14px'}}>Создана <b>{createdDate.getFullYear()}.{pad(createdDate.getMonth() + 1)}.{pad(createdDate.getDate() + 1)}</b></Typography>
