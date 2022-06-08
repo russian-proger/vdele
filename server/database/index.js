@@ -33,7 +33,13 @@ module.exports = async (core) => {
     // UserOrganization
     User.belongsToMany(Organization, { through: UserOrganization });
     Organization.belongsToMany(User, { through: UserOrganization });
+
+    Organization.hasMany(UserOrganization);
+    User.hasMany(UserOrganization);
+    UserOrganization.belongsTo(User);
+    UserOrganization.belongsTo(Organization);
     
+
     // UserProject
     User.belongsToMany(Project, { through: UserProject });
     Project.belongsToMany(User, { through: UserProject });

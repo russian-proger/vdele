@@ -196,8 +196,6 @@ function Participants(props) {
         users: [...state.users.filter(v => v.id != user_id), v.data]
       });
     });
-    // if ()
-    // console.log(user_id, right, window.project_info.id);
   }
 
   if (state.loading) return <CircularProgress />
@@ -292,23 +290,26 @@ function TaskViewer(props) {
             </ListSubheader>
           }
         >
-          {window.user_info.rights.right_id == 0 && state.task.status < 2 &&
-            <ListItem button onClick={incrementStatus}>
-              <ListItemText primary={"В следующую колонку"} />
-            </ListItem>
-          }
-          {window.user_info.rights.right_id == 0 && state.task.status > 0 &&
-            <ListItem button onClick={decrementStatus}>
-              <ListItemText primary={"В предыдущую колонку"} />
-            </ListItem>
+          {window.user_info.rights.right_id == 0 &&
+            <Box m={1}>
+              <Button fullWidth disabled={state.task.status <= 0 } variant="contained" onClick={decrementStatus}>
+                Переместить влево
+              </Button>
+            </Box>
           }
           {window.user_info.rights.right_id == 0 &&
-            <ListItem button onClick={() => props.OnDelete()}>
-              <ListItemIcon>
-                <DeleteIcon color="secondary" />
-              </ListItemIcon>
-              <ListItemText primary="Удалить" />
-            </ListItem>
+            <Box m={1}>
+              <Button fullWidth disabled={state.task.status >= 2 } variant="contained" onClick={incrementStatus}>
+                Переместить вправо
+              </Button>
+            </Box>
+          }
+          {window.user_info.rights.right_id == 0 &&
+            <Box m={1}>
+              <Button fullWidth color="secondary" variant="contained" onClick={() => props.OnDelete()}>
+                Удалить
+              </Button>
+            </Box>
           }
         </List>
       </Grid>

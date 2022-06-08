@@ -45,4 +45,7 @@ export default function Network(self) {
   this.enterToOrganization = (org_id) => this.requestAPI('enter_to_organization', {org_id});
   this.leaveFromOrganization = (org_id) => this.requestAPI('leave_from_organization', {org_id});
   this.removeOrganization = (org_id) => this.requestAPI('remove_organization', {org_id});
+  this.addParticipantToOrganization = (nick, org_id) => this.requestAPI('add_participant_to_organization', {nick, org_id});
+  this.updateUserOrganizationRight = (org_id, user_id, right) => this.requestAPI('update_user_organization_right', {org_id, user_id, right});
+  this.deleteParticipantFromOrganization = (user_id, org_id) => this.requestAPI('remove_participant_from_organization', {user_id, org_id});
 }

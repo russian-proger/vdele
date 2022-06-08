@@ -20,7 +20,7 @@ export default function Main() {
   return (
     <main>
       <div className={classes.placeholder}>
-        Лучшие проекты в одном месте
+        Все проекты в одном месте
       </div>
     </main>
   );
