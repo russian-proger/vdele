@@ -1,7 +1,6 @@
 const CookieParser = require('cookie-parser');
 const Express = require('express');
 
-
 async function Main() {
     const core = require("./core");
     const app = core.GetApp();

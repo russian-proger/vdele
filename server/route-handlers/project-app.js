@@ -19,18 +19,11 @@ function Main(core) {
       const right = await utils.database.GetUserProjectRight(core, req.user_info.id, req.params.project_id);
 
       if (!project) res.redirect('/');
-      if (project.OrganizationId == null) {
-        // User project
-      //   const rights = await getUserProjectRights(req.user_info.id, req.params.project_id);
-      //   req.user_info.rights = rights;
-        if (!project.isPublic && right == 3) {
-          return utils.express.SendView(res, '404.html');
-        }
-        req.user_info.rights = {right_id: right};
-      } else {
-        // Org project
+      if (!project.isPublic && right == 3) {
+        return utils.express.SendView(res, '404.html');
       }
-    
+      req.user_info.rights = {right_id: right};
+
       let vars = ({
           user: JSON.stringify({...req.user_info, token: undefined, password: undefined }),
           project: JSON.stringify({...project })

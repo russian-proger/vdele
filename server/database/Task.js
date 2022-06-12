@@ -7,7 +7,7 @@ const { Sequelize, DataTypes } = require('sequelize');
  */
 function DefineTask(core) {
     return core.GetSequelize().define('Task', {
-        name: DataTypes.STRING(63),
+        name: DataTypes.STRING(255),
         description: DataTypes.STRING(255),
         status: DataTypes.INTEGER() // 0 - in queue, 1 - in process, 2 - completed
     });

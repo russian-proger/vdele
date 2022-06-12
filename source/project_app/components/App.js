@@ -290,21 +290,21 @@ function TaskViewer(props) {
             </ListSubheader>
           }
         >
-          {window.user_info.rights.right_id == 0 &&
+          {window.user_info.rights.right_id <= 1 &&
             <Box m={1}>
               <Button fullWidth disabled={state.task.status <= 0 } variant="contained" onClick={decrementStatus}>
                 Переместить влево
               </Button>
             </Box>
           }
-          {window.user_info.rights.right_id == 0 &&
+          {window.user_info.rights.right_id <= 1 &&
             <Box m={1}>
               <Button fullWidth disabled={state.task.status >= 2 } variant="contained" onClick={incrementStatus}>
                 Переместить вправо
               </Button>
             </Box>
           }
-          {window.user_info.rights.right_id == 0 &&
+          {window.user_info.rights.right_id <= 1 &&
             <Box m={1}>
               <Button fullWidth color="secondary" variant="contained" onClick={() => props.OnDelete()}>
                 Удалить

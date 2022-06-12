@@ -38,6 +38,25 @@ module.exports = (core, router) => {
                 ProjectId: proj.id
             });
 
+            // Add all organization participants to the project
+            // with the same rights
+            const user_org = await core.GetModel('UserOrganization').findAll({
+                where: {
+                    OrganizationId: req.body.org_id,
+                    right: (req.body.privacy == "public" ? [0,1,2] : [0,1])
+                }
+            });
+
+            if (user_org != null) {
+                user_org.forEach(async v => {
+                    await core.GetModel('UserProject').create({
+                        UserId: v.dataValues.UserId,
+                        ProjectId: proj.id,
+                        right: v.dataValues.right
+                    })
+                })
+            }
+
             return res.send(JSON.stringify({result: true}));
             
         } else {

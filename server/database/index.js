@@ -30,7 +30,7 @@ module.exports = async (core) => {
     Project.belongsTo(Organization);
 
     
-    // UserOrganization
+    // User <- UserOrganization -> Organization
     User.belongsToMany(Organization, { through: UserOrganization });
     Organization.belongsToMany(User, { through: UserOrganization });
 
@@ -40,7 +40,7 @@ module.exports = async (core) => {
     UserOrganization.belongsTo(Organization);
     
 
-    // UserProject
+    // User <- UserProject -> Project
     User.belongsToMany(Project, { through: UserProject });
     Project.belongsToMany(User, { through: UserProject });
 
@@ -62,6 +62,6 @@ module.exports = async (core) => {
 
 
 /** Sync */
-    // seq.query("SET FOREIGN_KEY_CHECKS=0");
+    // await seq.query("SET FOREIGN_KEY_CHECKS=0");
     await seq.sync({force: false});
 }

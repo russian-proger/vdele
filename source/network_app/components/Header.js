@@ -142,13 +142,13 @@ export default function Header() {
             ВДеле
           </Typography>
         </Link>
-        <div className={classes.search}>
+        {/* <div className={classes.search}>
           <div className={classes.searchIcon}>
             <SearchIcon />
           </div>
           <InputBase classes={{root: classes.inputRoot, input: classes.input}} placeholder="Поиск…" color="secondary"
             inputProps={{ 'aria-label': 'search' }} onChange={v => onSearchChange(v)} onKeyDown={(v) => onSearchKeyDown(v)} />
-        </div>
+        </div> */}
         <div className={classes.empty_space} />
         <div>
           <Button onClick={onClickAvatar} className={classes.avatar_button} color="inherit">
